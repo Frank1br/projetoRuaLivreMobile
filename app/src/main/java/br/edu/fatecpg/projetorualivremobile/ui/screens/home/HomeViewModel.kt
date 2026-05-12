@@ -3,7 +3,6 @@ package br.edu.fatecpg.projetorualivremobile.ui.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.edu.fatecpg.projetorualivremobile.data.model.Alerta
-import br.edu.fatecpg.projetorualivremobile.data.model.NivelAlagamento
 import br.edu.fatecpg.projetorualivremobile.data.repository.AlagamentoRepository
 import br.edu.fatecpg.projetorualivremobile.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -40,25 +39,30 @@ class HomeViewModel @Inject constructor(
 
     fun carregarDados() {
         viewModelScope.launch {
+
             _uiState.update { it.copy(isLoading = true, error = null) }
-            val nomeUsuario = authRepository.currentUsuario?.nome ?: "usuário"
+
+            val nomeUsuario = authRepository.currentUsuario?.nome ?: "Usuário"
+
             val alagamentosResult = alagamentoRepository.getAlagamentos()
             val alertasResult = alagamentoRepository.getAlertas()
+
             val alagamentos = alagamentosResult.getOrElse { emptyList() }
 
             val total = alagamentos.size.coerceAtLeast(1)
-            val criticos = alagamentos.count { it.nivel == NivelAlagamento.CRITICO || it.nivel == NivelAlagamento.ALTO }
-            val medios = alagamentos.count { it.nivel == NivelAlagamento.MEDIO }
-            val livres = total - criticos - medios
+
+            val alagados = alagamentos.count { it.nivel_agua > 50 }      // grave
+            val afetados = alagamentos.count { it.nivel_agua in 20.0..50.0 }
+            val livres = alagamentos.count { it.nivel_agua < 20 }
 
             _uiState.update {
                 it.copy(
                     isLoading = false,
                     nomeUsuario = nomeUsuario,
                     totalBairros = alagamentos.size,
-                    pctAlagados = ((criticos.toFloat() / total) * 100).toInt(),
-                    pctAfetados = ((medios.toFloat() / total) * 100).toInt(),
-                    pctLivres = ((livres.coerceAtLeast(0).toFloat() / total) * 100).toInt(),
+                    pctAlagados = ((alagados.toFloat() / total) * 100).toInt(),
+                    pctAfetados = ((afetados.toFloat() / total) * 100).toInt(),
+                    pctLivres = ((livres.toFloat() / total) * 100).toInt(),
                     alertas = alertasResult.getOrElse { emptyList() },
                     error = alagamentosResult.exceptionOrNull()?.message
                 )

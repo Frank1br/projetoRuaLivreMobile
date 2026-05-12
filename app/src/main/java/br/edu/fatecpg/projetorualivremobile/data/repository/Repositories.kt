@@ -1,11 +1,6 @@
 package br.edu.fatecpg.projetorualivremobile.data.repository
 
-import br.edu.fatecpg.projetorualivremobile.data.model.Alagamento
-import br.edu.fatecpg.projetorualivremobile.data.model.Alerta
-import br.edu.fatecpg.projetorualivremobile.data.model.AuthResponse
-import br.edu.fatecpg.projetorualivremobile.data.model.LoginRequest
-import br.edu.fatecpg.projetorualivremobile.data.model.RegisterRequest
-import br.edu.fatecpg.projetorualivremobile.data.model.Usuario
+import br.edu.fatecpg.projetorualivremobile.data.model.*
 import br.edu.fatecpg.projetorualivremobile.data.remote.RuaLivreApi
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -13,25 +8,52 @@ import javax.inject.Singleton
 @Singleton
 class AuthRepository @Inject constructor(private val api: RuaLivreApi) {
 
-    private var currentUser: Usuario? = null
+    private var token: String? = null
+    private var usuario: Usuario? = null
 
-    val isLoggedIn: Boolean get() = currentUser != null
-    val currentUsuario: Usuario? get() = currentUser
+    val isLoggedIn: Boolean get() = token != null
+    val currentUsuario: Usuario? get() = usuario
 
-    suspend fun login(email: String, senha: String): Result<AuthResponse> = runCatching {
+    suspend fun login(email: String, senha: String): Result<String> = runCatching {
         val response = api.login(LoginRequest(email, senha))
-        currentUser = response.usuario
-        response
+
+        token = response.access_token
+
+        usuario = Usuario(
+            id = 1,
+            nome = "Usuário",
+            email = email,
+            nivel_acesso = "usuario",
+            status = "ativo"
+        )
+
+        token!!
     }
 
-    suspend fun register(nome: String, email: String, senha: String, telefone: String): Result<AuthResponse> = runCatching {
+    suspend fun register(
+        nome: String,
+        email: String,
+        senha: String,
+        telefone: String
+    ): Result<String> = runCatching {
         val response = api.register(RegisterRequest(nome, email, senha, telefone))
-        currentUser = response.usuario
-        response
+
+        token = response.access_token
+
+        usuario = Usuario(
+            id = 1,
+            nome = nome,
+            email = email,
+            nivel_acesso = "usuario",
+            status = "ativo"
+        )
+
+        token!!
     }
 
     fun logout() {
-        currentUser = null
+        token = null
+        usuario = null
     }
 }
 

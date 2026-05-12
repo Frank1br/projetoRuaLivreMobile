@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.edu.fatecpg.projetorualivremobile.data.model.Alerta
-import br.edu.fatecpg.projetorualivremobile.data.model.NivelAlagamento
 import br.edu.fatecpg.projetorualivremobile.ui.components.BottomBar
 import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaAltoColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaBaixoColor
@@ -362,16 +361,21 @@ private fun QuickAccessCard(
 
 @Composable
 private fun AlertaItem(alerta: Alerta, modifier: Modifier = Modifier) {
-    val dotColor = when (alerta.nivel) {
-        NivelAlagamento.CRITICO, NivelAlagamento.ALTO -> AlertaAltoColor
-        NivelAlagamento.MEDIO -> AlertaMedioColor
-        NivelAlagamento.BAIXO -> AlertaBaixoColor
+
+    val dotColor = when (alerta.nivel_risco_id) {
+        3 -> AlertaAltoColor
+        2 -> AlertaMedioColor
+        1 -> AlertaBaixoColor
+        else -> AlertaMedioColor
     }
-    val badgeText = when (alerta.nivel) {
-        NivelAlagamento.CRITICO, NivelAlagamento.ALTO -> "Alto"
-        NivelAlagamento.MEDIO -> "Médio"
-        NivelAlagamento.BAIXO -> "Baixo"
+
+    val badgeText = when (alerta.nivel_risco_id) {
+        3 -> "Alto"
+        2 -> "Médio"
+        1 -> "Baixo"
+        else -> "Médio"
     }
+
     val badgeBg = dotColor.copy(alpha = 0.12f)
 
     Card(
@@ -387,7 +391,7 @@ private fun AlertaItem(alerta: Alerta, modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Dot + info
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f)
@@ -399,13 +403,15 @@ private fun AlertaItem(alerta: Alerta, modifier: Modifier = Modifier) {
                         .background(dotColor)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
+
                 Column {
                     Text(
-                        text = alerta.titulo,
+                        text = "Alerta de alagamento",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = TextDark
                     )
+
                     Text(
                         text = alerta.mensagem,
                         fontSize = 12.sp,
@@ -413,7 +419,7 @@ private fun AlertaItem(alerta: Alerta, modifier: Modifier = Modifier) {
                     )
                 }
             }
-            // Badge + chevron
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
@@ -428,7 +434,9 @@ private fun AlertaItem(alerta: Alerta, modifier: Modifier = Modifier) {
                         color = dotColor
                     )
                 }
+
                 Spacer(modifier = Modifier.width(4.dp))
+
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = null,
