@@ -32,8 +32,8 @@ data class TokenResponse(
 
 enum class NivelAlagamento { BAIXO, MEDIO, ALTO, CRITICO }
 
-// Espelha AlagamentoResponse da API. latitude/longitude/descricao/bairro
-// ainda não são expostos pela API — ficam com default até o backend enviá-los.
+// Espelha AlagamentoResponse da API. latitude/longitude/bairro/municipio
+// vêm da câmera associada e podem ser nulos (câmera sem coords cadastradas).
 data class Alagamento(
     @SerializedName("id") val id: String = "",
     @SerializedName("camera_id") val cameraId: Int = 0,
@@ -42,10 +42,11 @@ data class Alagamento(
     @SerializedName("confianca") val confianca: Double = 0.0,
     @SerializedName("status") val status: String = "ativo",
     @SerializedName("data_hora") val dataRegistro: String = "",
-    @SerializedName("latitude") val latitude: Double = 0.0,
-    @SerializedName("longitude") val longitude: Double = 0.0,
-    @SerializedName("descricao") val descricao: String = "",
-    @SerializedName("bairro") val bairro: String = ""
+    @SerializedName("latitude") val latitude: Double? = null,
+    @SerializedName("longitude") val longitude: Double? = null,
+    @SerializedName("bairro") val bairro: String? = null,
+    @SerializedName("municipio") val municipio: String? = null,
+    @SerializedName("descricao") val descricao: String = ""
 ) {
     // A API não envia um enum de nível; derivamos da cobertura de água (0–100%).
     val nivel: NivelAlagamento

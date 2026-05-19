@@ -163,7 +163,8 @@ fun MapScreen(
 
                 // Zonas de alagamento (polígono circular semi-transparente)
                 uiState.alagamentos.forEach { alagamento ->
-                    if (alagamento.latitude == 0.0 && alagamento.longitude == 0.0) return@forEach
+                    val aLat = alagamento.latitude ?: return@forEach
+                    val aLon = alagamento.longitude ?: return@forEach
                     val fillColor = when (alagamento.nivel) {
                         NivelAlagamento.CRITICO -> 0x88E53935.toInt()
                         NivelAlagamento.ALTO    -> 0x88F57C00.toInt()
@@ -178,7 +179,7 @@ fun MapScreen(
                     }
                     mv.overlays.add(
                         buildCirclePolygon(
-                            GeoPoint(alagamento.latitude, alagamento.longitude),
+                            GeoPoint(aLat, aLon),
                             radiusMeters,
                             fillColor
                         )
@@ -187,7 +188,8 @@ fun MapScreen(
 
                 // Marcadores de alagamento
                 uiState.alagamentos.forEach { alagamento ->
-                    if (alagamento.latitude == 0.0 && alagamento.longitude == 0.0) return@forEach
+                    val aLat = alagamento.latitude ?: return@forEach
+                    val aLon = alagamento.longitude ?: return@forEach
                     val markerColor = when (alagamento.nivel) {
                         NivelAlagamento.CRITICO -> android.graphics.Color.rgb(229, 57, 53)
                         NivelAlagamento.ALTO    -> android.graphics.Color.rgb(245, 124, 0)
@@ -195,7 +197,7 @@ fun MapScreen(
                         NivelAlagamento.BAIXO   -> android.graphics.Color.rgb(46, 125, 50)
                     }
                     Marker(mv).apply {
-                        position = GeoPoint(alagamento.latitude, alagamento.longitude)
+                        position = GeoPoint(aLat, aLon)
                         icon = buildCircleDrawable(context, markerColor, 36)
                         title = null
                         infoWindow = null
@@ -422,6 +424,17 @@ private fun AlagamentoInfoPanel(alagamento: Alagamento, onDismiss: () -> Unit) {
                 fontSize = 13.sp,
                 color = Color(0xFF555566)
             )
+
+            alagamento.bairro?.takeIf { it.isNotBlank() }?.let { bairro ->
+                val local = alagamento.municipio
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { "$bairro — $it" } ?: bairro
+                Text(
+                    text = "Local: $local",
+                    fontSize = 13.sp,
+                    color = Color(0xFF555566)
+                )
+            }
 
             if (alagamento.dataRegistro.isNotBlank()) {
                 Text(
