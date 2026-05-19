@@ -43,8 +43,6 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     // Compose BOM
     implementation(platform(libs.compose.bom))
@@ -68,6 +66,15 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
+
+    // Networking
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+
+    // Map (OpenStreetMap - sem API key)
+    implementation(libs.osmdroid)
 
     // Tests
     testImplementation(libs.junit)
