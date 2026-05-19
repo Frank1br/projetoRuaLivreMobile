@@ -32,15 +32,30 @@ data class TokenResponse(
 
 enum class NivelAlagamento { BAIXO, MEDIO, ALTO, CRITICO }
 
+// Espelha AlagamentoResponse da API. latitude/longitude/descricao/bairro
+// ainda não são expostos pela API — ficam com default até o backend enviá-los.
 data class Alagamento(
-    @SerializedName("id") val id: String,
-    @SerializedName("latitude") val latitude: Double,
-    @SerializedName("longitude") val longitude: Double,
-    @SerializedName("nivel") val nivel: NivelAlagamento,
-    @SerializedName("descricao") val descricao: String,
-    @SerializedName("bairro") val bairro: String,
-    @SerializedName("data_registro") val dataRegistro: String
-)
+    @SerializedName("id") val id: String = "",
+    @SerializedName("camera_id") val cameraId: Int = 0,
+    @SerializedName("regiao_id") val regiaoId: Int = 0,
+    @SerializedName("nivel_agua") val nivelAgua: Double = 0.0,
+    @SerializedName("confianca") val confianca: Double = 0.0,
+    @SerializedName("status") val status: String = "ativo",
+    @SerializedName("data_hora") val dataRegistro: String = "",
+    @SerializedName("latitude") val latitude: Double = 0.0,
+    @SerializedName("longitude") val longitude: Double = 0.0,
+    @SerializedName("descricao") val descricao: String = "",
+    @SerializedName("bairro") val bairro: String = ""
+) {
+    // A API não envia um enum de nível; derivamos da cobertura de água (0–100%).
+    val nivel: NivelAlagamento
+        get() = when {
+            nivelAgua >= 70.0 -> NivelAlagamento.CRITICO
+            nivelAgua >= 45.0 -> NivelAlagamento.ALTO
+            nivelAgua >= 20.0 -> NivelAlagamento.MEDIO
+            else -> NivelAlagamento.BAIXO
+        }
+}
 
 data class FloodAnalysis(
     @SerializedName("camera_id") val cameraId: String,
@@ -97,12 +112,13 @@ data class LocalizacaoCameraRequest(
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
+// Espelha o retorno de /dashboard/alertas (sem campo de nível).
 data class Alerta(
-    @SerializedName("id") val id: String,
-    @SerializedName("titulo") val titulo: String,
-    @SerializedName("mensagem") val mensagem: String,
-    @SerializedName("nivel") val nivel: NivelAlagamento,
-    @SerializedName("data_hora") val dataHora: String
+    @SerializedName("id") val id: String = "",
+    @SerializedName("alagamento_id") val alagamentoId: Int = 0,
+    @SerializedName("mensagem") val mensagem: String = "",
+    @SerializedName("enviado") val enviado: Boolean = false,
+    @SerializedName("data_envio") val dataEnvio: String? = null
 )
 
 data class DashboardStats(

@@ -44,10 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.edu.fatecpg.projetorualivremobile.data.model.Alerta
-import br.edu.fatecpg.projetorualivremobile.data.model.NivelAlagamento
 import br.edu.fatecpg.projetorualivremobile.ui.components.BottomBar
-import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaAltoColor
-import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaBaixoColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaMedioColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.IndigoPrimario
 
@@ -363,20 +360,7 @@ private fun QuickAccessCard(
 @Composable
 private fun AlertaItem(alerta: Alerta, modifier: Modifier = Modifier) {
 
-    val dotColor = when (alerta.nivel) {
-        NivelAlagamento.CRITICO, NivelAlagamento.ALTO -> AlertaAltoColor
-        NivelAlagamento.MEDIO -> AlertaMedioColor
-        NivelAlagamento.BAIXO -> AlertaBaixoColor
-    }
-
-    val badgeText = when (alerta.nivel) {
-        NivelAlagamento.CRITICO -> "Crítico"
-        NivelAlagamento.ALTO -> "Alto"
-        NivelAlagamento.MEDIO -> "Médio"
-        NivelAlagamento.BAIXO -> "Baixo"
-    }
-
-    val badgeBg = dotColor.copy(alpha = 0.12f)
+    val dotColor = AlertaMedioColor
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -421,17 +405,12 @@ private fun AlertaItem(alerta: Alerta, modifier: Modifier = Modifier) {
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(badgeBg)
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
+                alerta.dataEnvio?.let { data ->
                     Text(
-                        text = badgeText,
+                        text = data.take(16),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
-                        color = dotColor
+                        color = TextGray
                     )
                 }
 

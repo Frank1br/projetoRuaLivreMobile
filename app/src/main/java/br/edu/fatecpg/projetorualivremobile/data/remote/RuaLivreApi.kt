@@ -179,12 +179,12 @@ class FakeApiService : RuaLivreApi {
     override suspend fun getAlagamentos(): List<Alagamento> {
         delay(800)
         return listOf(
-            Alagamento("1", -23.5505, -46.6333, NivelAlagamento.ALTO, "Av. Principal alagada", "Centro", "2024-01-15 14:30"),
-            Alagamento("2", -23.5489, -46.6388, NivelAlagamento.MEDIO, "Rua parcialmente bloqueada", "Liberdade", "2024-01-15 13:00"),
-            Alagamento("3", -23.5432, -46.6291, NivelAlagamento.BAIXO, "Poça na calçada", "Vila Nova", "2024-01-15 12:15"),
-            Alagamento("4", -23.5521, -46.6412, NivelAlagamento.CRITICO, "Rua completamente alagada", "Pinheiros", "2024-01-15 15:00"),
-            Alagamento("5", -23.5560, -46.6450, NivelAlagamento.ALTO, "Trânsito bloqueado", "Consolação", "2024-01-15 14:00"),
-            Alagamento("6", -23.5480, -46.6300, NivelAlagamento.MEDIO, "Água na rua principal", "Jardins", "2024-01-15 11:30")
+            Alagamento(id = "1", nivelAgua = 55.0, latitude = -23.5505, longitude = -46.6333, descricao = "Av. Principal alagada", bairro = "Centro", dataRegistro = "2024-01-15 14:30"),
+            Alagamento(id = "2", nivelAgua = 30.0, latitude = -23.5489, longitude = -46.6388, descricao = "Rua parcialmente bloqueada", bairro = "Liberdade", dataRegistro = "2024-01-15 13:00"),
+            Alagamento(id = "3", nivelAgua = 10.0, latitude = -23.5432, longitude = -46.6291, descricao = "Poça na calçada", bairro = "Vila Nova", dataRegistro = "2024-01-15 12:15"),
+            Alagamento(id = "4", nivelAgua = 85.0, latitude = -23.5521, longitude = -46.6412, descricao = "Rua completamente alagada", bairro = "Pinheiros", dataRegistro = "2024-01-15 15:00"),
+            Alagamento(id = "5", nivelAgua = 50.0, latitude = -23.5560, longitude = -46.6450, descricao = "Trânsito bloqueado", bairro = "Consolação", dataRegistro = "2024-01-15 14:00"),
+            Alagamento(id = "6", nivelAgua = 30.0, latitude = -23.5480, longitude = -46.6300, descricao = "Água na rua principal", bairro = "Jardins", dataRegistro = "2024-01-15 11:30")
         )
     }
 
@@ -243,9 +243,9 @@ class FakeApiService : RuaLivreApi {
     override suspend fun getAlertas(limit: Int): List<Alerta> {
         delay(600)
         return listOf(
-            Alerta("1", "Centro", "12 ruas afetadas", NivelAlagamento.ALTO, "14:30"),
-            Alerta("2", "Liberdade", "5 ruas afetadas", NivelAlagamento.MEDIO, "13:00"),
-            Alerta("3", "Vila Nova", "2 ruas afetadas", NivelAlagamento.BAIXO, "12:15")
+            Alerta(id = "1", alagamentoId = 1, mensagem = "Centro: 12 ruas afetadas", enviado = true, dataEnvio = "2024-01-15 14:30"),
+            Alerta(id = "2", alagamentoId = 2, mensagem = "Liberdade: 5 ruas afetadas", enviado = true, dataEnvio = "2024-01-15 13:00"),
+            Alerta(id = "3", alagamentoId = 3, mensagem = "Vila Nova: 2 ruas afetadas", enviado = true, dataEnvio = "2024-01-15 12:15")
         ).take(limit)
     }
 }
