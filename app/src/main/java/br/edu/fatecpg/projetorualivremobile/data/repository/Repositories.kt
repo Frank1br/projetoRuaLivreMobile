@@ -35,16 +35,18 @@ class AuthRepository @Inject constructor(
     val currentUsuario: Usuario? get() = currentUser
 
     suspend fun login(email: String, senha: String): Result<TokenResponse> = runCatching {
-        val response = api.login(LoginRequest(email, senha))
+        val normalizedEmail = email.trim().lowercase()
+        val response = api.login(LoginRequest(normalizedEmail, senha))
         tokenStore.token = response.accessToken
         currentUser = runCatching { api.getMe() }.getOrNull()
         response
     }
 
     suspend fun register(nome: String, email: String, senha: String): Result<Usuario> = runCatching {
-        val usuario = api.register(RegisterRequest(nome, email, senha))
+        val normalizedEmail = email.trim().lowercase()
+        val usuario = api.register(RegisterRequest(nome.trim(), normalizedEmail, senha))
         currentUser = usuario
-        val loginResponse = api.login(LoginRequest(email, senha))
+        val loginResponse = api.login(LoginRequest(normalizedEmail, senha))
         tokenStore.token = loginResponse.accessToken
         usuario
     }
