@@ -2,7 +2,7 @@ package br.edu.fatecpg.projetorualivremobile.data.remote
 
 import br.edu.fatecpg.projetorualivremobile.data.model.Alagamento
 import br.edu.fatecpg.projetorualivremobile.data.model.Alerta
-import br.edu.fatecpg.projetorualivremobile.data.model.AuthResponse
+import br.edu.fatecpg.projetorualivremobile.data.model.TokenResponse
 import br.edu.fatecpg.projetorualivremobile.data.model.Camera
 import br.edu.fatecpg.projetorualivremobile.data.model.CreateCameraRequest
 import br.edu.fatecpg.projetorualivremobile.data.model.DashboardStats
@@ -33,10 +33,10 @@ interface RuaLivreApi {
     // ── Auth ──────────────────────────────────────────────────────────────────
 
     @POST("auth/login")
-    suspend fun login(@Body request: LoginRequest): AuthResponse
+    suspend fun login(@Body request: LoginRequest): TokenResponse
 
     @POST("auth/register")
-    suspend fun register(@Body request: RegisterRequest): AuthResponse
+    suspend fun register(@Body request: RegisterRequest): Usuario
 
     @GET("auth/me")
     suspend fun getMe(): Usuario
@@ -107,32 +107,28 @@ interface RuaLivreApi {
 class FakeApiService : RuaLivreApi {
 
     private val fakeUsuario = Usuario(
-        id = "1",
+        id = 1,
         nome = "Usuário Demo",
-        email = "usuario@email.com",
-        telefone = ""
+        email = "usuario@email.com"
     )
 
     // ── Auth ──────────────────────────────────────────────────────────────────
 
-    override suspend fun login(request: LoginRequest): AuthResponse {
+    override suspend fun login(request: LoginRequest): TokenResponse {
         delay(1000)
         if (request.email.isBlank() || request.senha.isBlank())
             throw Exception("Usuário ou senha inválidos")
-        return AuthResponse(usuario = fakeUsuario, token = "fake_token_123")
+        return TokenResponse(accessToken = "fake_token_123")
     }
 
-    override suspend fun register(request: RegisterRequest): AuthResponse {
+    override suspend fun register(request: RegisterRequest): Usuario {
         delay(1000)
         if (request.nome.isBlank() || request.email.isBlank())
             throw Exception("Nome e e-mail são obrigatórios")
         val validation = PasswordValidator.validate(request.senha, request.nome, request.email)
         if (validation.isFailure)
             throw Exception(validation.exceptionOrNull()?.message ?: "Senha inválida")
-        return AuthResponse(
-            usuario = fakeUsuario.copy(nome = request.nome, email = request.email),
-            token = "fake_token_456"
-        )
+        return fakeUsuario.copy(nome = request.nome, email = request.email)
     }
 
     override suspend fun getMe(): Usuario {

@@ -84,7 +84,7 @@ class RegisterViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            val result = authRepository.register(state.usuario, state.email, state.senha, "")
+            val result = authRepository.register(state.usuario, state.email, state.senha)
             result.fold(
                 onSuccess = { _uiState.update { it.copy(isLoading = false, isRegisterSuccess = true) } },
                 onFailure = { e -> _uiState.update { it.copy(isLoading = false, error = e.message ?: "Erro ao cadastrar") } }

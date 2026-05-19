@@ -2,7 +2,7 @@ package br.edu.fatecpg.projetorualivremobile.data.repository
 
 import br.edu.fatecpg.projetorualivremobile.data.model.Alagamento
 import br.edu.fatecpg.projetorualivremobile.data.model.Alerta
-import br.edu.fatecpg.projetorualivremobile.data.model.AuthResponse
+import br.edu.fatecpg.projetorualivremobile.data.model.TokenResponse
 import br.edu.fatecpg.projetorualivremobile.data.model.Camera
 import br.edu.fatecpg.projetorualivremobile.data.model.DashboardStats
 import br.edu.fatecpg.projetorualivremobile.data.model.HistoricoEntry
@@ -34,18 +34,19 @@ class AuthRepository @Inject constructor(
     val isLoggedIn: Boolean get() = currentUser != null
     val currentUsuario: Usuario? get() = currentUser
 
-    suspend fun login(email: String, senha: String): Result<AuthResponse> = runCatching {
+    suspend fun login(email: String, senha: String): Result<TokenResponse> = runCatching {
         val response = api.login(LoginRequest(email, senha))
-        currentUser = response.usuario
-        tokenStore.token = response.token
+        tokenStore.token = response.accessToken
+        currentUser = runCatching { api.getMe() }.getOrNull()
         response
     }
 
-    suspend fun register(nome: String, email: String, senha: String, telefone: String): Result<AuthResponse> = runCatching {
-        val response = api.register(RegisterRequest(nome, email, senha, telefone))
-        currentUser = response.usuario
-        tokenStore.token = response.token
-        response
+    suspend fun register(nome: String, email: String, senha: String): Result<Usuario> = runCatching {
+        val usuario = api.register(RegisterRequest(nome, email, senha))
+        currentUser = usuario
+        val loginResponse = api.login(LoginRequest(email, senha))
+        tokenStore.token = loginResponse.accessToken
+        usuario
     }
 
     suspend fun getMe(): Result<Usuario> = runCatching { api.getMe() }

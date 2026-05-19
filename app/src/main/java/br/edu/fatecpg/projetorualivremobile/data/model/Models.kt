@@ -5,10 +5,11 @@ import com.google.gson.annotations.SerializedName
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 data class Usuario(
-    @SerializedName("id") val id: String,
+    @SerializedName("id") val id: Int,
     @SerializedName("nome") val nome: String,
     @SerializedName("email") val email: String,
-    @SerializedName("telefone") val telefone: String = ""
+    @SerializedName("nivel_acesso") val nivelAcesso: String = "usuario",
+    @SerializedName("status") val status: String = "ativo"
 )
 
 data class LoginRequest(
@@ -19,13 +20,12 @@ data class LoginRequest(
 data class RegisterRequest(
     @SerializedName("nome") val nome: String,
     @SerializedName("email") val email: String,
-    @SerializedName("senha") val senha: String,
-    @SerializedName("telefone") val telefone: String
+    @SerializedName("senha") val senha: String
 )
 
-data class AuthResponse(
-    @SerializedName("usuario") val usuario: Usuario,
-    @SerializedName("token") val token: String
+data class TokenResponse(
+    @SerializedName("access_token") val accessToken: String,
+    @SerializedName("token_type") val tokenType: String = "bearer"
 )
 
 // ─── Alagamentos / Flood ──────────────────────────────────────────────────────
