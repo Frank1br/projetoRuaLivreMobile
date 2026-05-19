@@ -84,15 +84,32 @@ data class ParaconsistentAnalysis(
 
 enum class StatusCamera { ATIVA, INATIVA, MANUTENCAO }
 
+// Espelha CameraResponse da API. A API não envia "nome" nem um enum de
+// status — derivamos ambos. latitude/longitude podem vir nulos.
 data class Camera(
-    @SerializedName("id") val id: String,
-    @SerializedName("nome") val nome: String,
-    @SerializedName("latitude") val latitude: Double,
-    @SerializedName("longitude") val longitude: Double,
-    @SerializedName("bairro") val bairro: String,
-    @SerializedName("status") val status: StatusCamera = StatusCamera.ATIVA,
-    @SerializedName("ativa") val ativa: Boolean = true
-)
+    @SerializedName("id") val id: String = "",
+    @SerializedName("regiao_id") val regiaoId: Int = 0,
+    @SerializedName("endereco_rtsp") val enderecoRtsp: String = "",
+    @SerializedName("localizacao") val localizacao: String? = null,
+    @SerializedName("status") val statusRaw: String = "ativo",
+    @SerializedName("latitude") val latitude: Double? = null,
+    @SerializedName("longitude") val longitude: Double? = null,
+    @SerializedName("altitude_m") val altitudeM: Double? = null,
+    @SerializedName("bairro") val bairro: String? = null,
+    @SerializedName("municipio") val municipio: String? = null
+) {
+    val nome: String
+        get() = localizacao?.takeIf { it.isNotBlank() }
+            ?: bairro?.takeIf { it.isNotBlank() }
+            ?: "Câmera $id"
+
+    val status: StatusCamera
+        get() = when (statusRaw.lowercase()) {
+            "inativo", "inativa" -> StatusCamera.INATIVA
+            "manutencao", "manutenção" -> StatusCamera.MANUTENCAO
+            else -> StatusCamera.ATIVA
+        }
+}
 
 data class CreateCameraRequest(
     @SerializedName("nome") val nome: String,
@@ -121,16 +138,22 @@ data class Alerta(
     @SerializedName("data_envio") val dataEnvio: String? = null
 )
 
-data class DashboardStats(
-    @SerializedName("total_cameras") val totalCameras: Int,
-    @SerializedName("cameras_ativas") val camerasAtivas: Int,
-    @SerializedName("alagamentos_ativos") val alagamentosAtivos: Int,
-    @SerializedName("alagamentos_hoje") val alagamentosHoje: Int,
-    @SerializedName("nivel_medio") val nivelMedio: NivelAlagamento? = null
+data class RegiaoCount(
+    @SerializedName("regiao") val regiao: String = "",
+    @SerializedName("total") val total: Int = 0
 )
 
+// Espelha /dashboard/stats.
+data class DashboardStats(
+    @SerializedName("total_alagamentos_ativos") val totalAlagamentosAtivos: Int = 0,
+    @SerializedName("total_cameras_ativas") val totalCamerasAtivas: Int = 0,
+    @SerializedName("total_alertas_hoje") val totalAlertasHoje: Int = 0,
+    @SerializedName("alagamentos_por_regiao") val alagamentosPorRegiao: List<RegiaoCount> = emptyList()
+)
+
+// Espelha /dashboard/historico.
 data class HistoricoEntry(
-    @SerializedName("data") val data: String,
-    @SerializedName("alagamentos") val alagamentos: Int,
-    @SerializedName("cameras_ativas") val camerasAtivas: Int
+    @SerializedName("data") val data: String = "",
+    @SerializedName("total_ocorrencias") val totalOcorrencias: Int = 0,
+    @SerializedName("nivel_agua_medio") val nivelAguaMedio: Double = 0.0
 )

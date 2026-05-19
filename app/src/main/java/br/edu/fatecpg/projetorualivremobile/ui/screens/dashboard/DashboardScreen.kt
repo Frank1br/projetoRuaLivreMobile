@@ -41,10 +41,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import br.edu.fatecpg.projetorualivremobile.data.model.NivelAlagamento
 import br.edu.fatecpg.projetorualivremobile.ui.components.BottomBar
 import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaAltoColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaBaixoColor
-import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaMedioColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.IndigoPrimario
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,13 +112,18 @@ fun DashboardScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         StatCard(
-                            value = "${uiState.totalBairrosAlagados}",
-                            label = "Bairros alagados",
+                            value = "${uiState.alagamentosAtivos}",
+                            label = "Alagamentos ativos",
                             modifier = Modifier.weight(1f)
                         )
                         StatCard(
-                            value = "${uiState.totalRuasAfetadas}",
-                            label = "Ruas afetadas",
+                            value = "${uiState.camerasAtivas}",
+                            label = "Câmeras ativas",
+                            modifier = Modifier.weight(1f)
+                        )
+                        StatCard(
+                            value = "${uiState.alertasHoje}",
+                            label = "Alertas hoje",
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -134,34 +139,48 @@ fun DashboardScreen(
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
                             Text(
-                                text = "Distribuição",
+                                text = "Distribuição por nível",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color(0xFF1A1A2E)
                             )
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                DonutChart(
-                                    segments = listOf(
-                                        DonutSegment(0.10f, AlertaAltoColor),
-                                        DonutSegment(0.40f, IndigoPrimario),
-                                        DonutSegment(0.50f, AlertaBaixoColor)
-                                    ),
-                                    modifier = Modifier.size(130.dp)
-                                )
+                            val criticoAlto = (uiState.porNivel[NivelAlagamento.CRITICO] ?: 0) +
+                                (uiState.porNivel[NivelAlagamento.ALTO] ?: 0)
+                            val medio = uiState.porNivel[NivelAlagamento.MEDIO] ?: 0
+                            val baixo = uiState.porNivel[NivelAlagamento.BAIXO] ?: 0
+                            val total = criticoAlto + medio + baixo
 
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                                    modifier = Modifier.padding(start = 16.dp)
+                            if (total == 0) {
+                                Text(
+                                    text = "Sem alagamentos registrados.",
+                                    fontSize = 13.sp,
+                                    color = Color(0xFF9999AA)
+                                )
+                            } else {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    LegendRow(color = AlertaAltoColor, label = "10% Alagados")
-                                    LegendRow(color = IndigoPrimario, label = "40% Poucos afetados")
-                                    LegendRow(color = AlertaBaixoColor, label = "50% Não afetados")
+                                    DonutChart(
+                                        segments = listOf(
+                                            DonutSegment(criticoAlto / total.toFloat(), AlertaAltoColor),
+                                            DonutSegment(medio / total.toFloat(), IndigoPrimario),
+                                            DonutSegment(baixo / total.toFloat(), AlertaBaixoColor)
+                                        ),
+                                        modifier = Modifier.size(130.dp)
+                                    )
+
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                                        modifier = Modifier.padding(start = 16.dp)
+                                    ) {
+                                        LegendRow(color = AlertaAltoColor, label = "$criticoAlto Alto/Crítico")
+                                        LegendRow(color = IndigoPrimario, label = "$medio Médio")
+                                        LegendRow(color = AlertaBaixoColor, label = "$baixo Baixo")
+                                    }
                                 }
                             }
                         }
@@ -178,43 +197,48 @@ fun DashboardScreen(
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
                             Text(
-                                text = "Média dos locais de alagamento",
+                                text = "Ocorrências por dia",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color(0xFF1A1A2E)
                             )
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            val months = listOf("Jan", "Fev", "Mar", "Abr", "Mai", "Jun")
-                            BarChart(
-                                months = months,
-                                data2025 = listOf(5f, 8f, 12f, 7f, 10f, 15f),
-                                data2026 = listOf(3f, 6f, 9f, 11f, 8f, 13f),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(140.dp)
-                            )
+                            val historico = uiState.historico.takeLast(12)
+                            if (historico.isEmpty()) {
+                                Text(
+                                    text = "Sem histórico no período.",
+                                    fontSize = 13.sp,
+                                    color = Color(0xFF9999AA)
+                                )
+                            } else {
+                                val labels = historico.map { it.data.takeLast(5) }
+                                BarChart(
+                                    values = historico.map { it.totalOcorrencias.toFloat() },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(140.dp)
+                                )
 
-                            // Month labels
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceAround
-                            ) {
-                                months.forEach { month ->
-                                    Text(
-                                        text = month,
-                                        fontSize = 11.sp,
-                                        color = Color(0xFF9999AA),
-                                        fontWeight = FontWeight.Medium
-                                    )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceAround
+                                ) {
+                                    labels.forEach { label ->
+                                        Text(
+                                            text = label,
+                                            fontSize = 9.sp,
+                                            color = Color(0xFF9999AA),
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
                                 }
-                            }
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
 
-                            Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                                LegendRow(color = IndigoPrimario, label = "2025")
-                                LegendRow(color = AlertaMedioColor, label = "2026")
+                                Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                                    LegendRow(color = IndigoPrimario, label = "Ocorrências de alagamento")
+                                }
                             }
                         }
                     }
@@ -281,33 +305,23 @@ private fun DonutChart(segments: List<DonutSegment>, modifier: Modifier = Modifi
 
 @Composable
 private fun BarChart(
-    months: List<String>,
-    data2025: List<Float>,
-    data2026: List<Float>,
+    values: List<Float>,
     modifier: Modifier = Modifier
 ) {
-    val maxVal = (data2025 + data2026).maxOrNull() ?: 1f
+    val maxVal = values.maxOrNull()?.takeIf { it > 0f } ?: 1f
 
     Canvas(modifier = modifier) {
-        val barWidth = size.width / (months.size * 3f)
-        val gap = barWidth * 0.4f
+        if (values.isEmpty()) return@Canvas
+        val slot = size.width / values.size
+        val barWidth = slot * 0.6f
+        val gap = (slot - barWidth) / 2f
 
-        months.forEachIndexed { i, _ ->
-            val groupStart = i * (barWidth * 3f)
-
-            // 2025 bar
-            val h1 = (data2025[i] / maxVal) * (size.height - 20.dp.toPx())
+        values.forEachIndexed { i, v ->
+            val h = (v / maxVal) * (size.height - 20.dp.toPx())
             drawRect(
                 color = IndigoPrimario,
-                topLeft = Offset(groupStart + gap, size.height - h1),
-                size = Size(barWidth, h1)
-            )
-            // 2026 bar
-            val h2 = (data2026[i] / maxVal) * (size.height - 20.dp.toPx())
-            drawRect(
-                color = AlertaMedioColor,
-                topLeft = Offset(groupStart + barWidth + gap * 1.5f, size.height - h2),
-                size = Size(barWidth, h2)
+                topLeft = Offset(i * slot + gap, size.height - h),
+                size = Size(barWidth, h)
             )
         }
     }

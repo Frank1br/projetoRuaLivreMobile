@@ -163,6 +163,7 @@ fun MapScreen(
 
                 // Zonas de alagamento (polígono circular semi-transparente)
                 uiState.alagamentos.forEach { alagamento ->
+                    if (alagamento.latitude == 0.0 && alagamento.longitude == 0.0) return@forEach
                     val fillColor = when (alagamento.nivel) {
                         NivelAlagamento.CRITICO -> 0x88E53935.toInt()
                         NivelAlagamento.ALTO    -> 0x88F57C00.toInt()
@@ -186,6 +187,7 @@ fun MapScreen(
 
                 // Marcadores de alagamento
                 uiState.alagamentos.forEach { alagamento ->
+                    if (alagamento.latitude == 0.0 && alagamento.longitude == 0.0) return@forEach
                     val markerColor = when (alagamento.nivel) {
                         NivelAlagamento.CRITICO -> android.graphics.Color.rgb(229, 57, 53)
                         NivelAlagamento.ALTO    -> android.graphics.Color.rgb(245, 124, 0)
@@ -207,13 +209,15 @@ fun MapScreen(
 
                 // Marcadores de câmera
                 uiState.cameras.forEach { camera ->
+                    val camLat = camera.latitude ?: return@forEach
+                    val camLon = camera.longitude ?: return@forEach
                     val camColor = when (camera.status) {
                         StatusCamera.ATIVA      -> android.graphics.Color.rgb(43, 43, 124)
                         StatusCamera.MANUTENCAO -> android.graphics.Color.rgb(245, 124, 0)
                         StatusCamera.INATIVA    -> android.graphics.Color.rgb(150, 150, 160)
                     }
                     Marker(mv).apply {
-                        position = GeoPoint(camera.latitude, camera.longitude)
+                        position = GeoPoint(camLat, camLon)
                         icon = buildCameraDrawable(context, camColor)
                         title = null
                         infoWindow = null
@@ -332,7 +336,7 @@ private fun CameraInfoPanel(camera: Camera, onDismiss: () -> Unit) {
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = "Bairro: ${camera.bairro}",
+                text = "Bairro: ${camera.bairro ?: "—"}",
                 fontSize = 14.sp,
                 color = Color(0xFF555566)
             )
@@ -406,7 +410,7 @@ private fun AlagamentoInfoPanel(alagamento: Alagamento, onDismiss: () -> Unit) {
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = alagamento.descricao,
+                text = alagamento.descricao.ifBlank { "Alagamento detectado" },
                 fontSize = 14.sp,
                 color = Color(0xFF1A1A2E)
             )
@@ -414,16 +418,18 @@ private fun AlagamentoInfoPanel(alagamento: Alagamento, onDismiss: () -> Unit) {
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = "Bairro: ${alagamento.bairro}",
+                text = "Nível da água: ${"%.0f".format(alagamento.nivelAgua)}%",
                 fontSize = 13.sp,
                 color = Color(0xFF555566)
             )
 
-            Text(
-                text = "Registrado: ${alagamento.dataRegistro}",
-                fontSize = 12.sp,
-                color = Color(0xFF888899)
-            )
+            if (alagamento.dataRegistro.isNotBlank()) {
+                Text(
+                    text = "Registrado: ${alagamento.dataRegistro.take(16)}",
+                    fontSize = 12.sp,
+                    color = Color(0xFF888899)
+                )
+            }
         }
     }
 }

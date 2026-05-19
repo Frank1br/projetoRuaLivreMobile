@@ -13,6 +13,7 @@ import br.edu.fatecpg.projetorualivremobile.data.model.LocalizacaoCameraRequest
 import br.edu.fatecpg.projetorualivremobile.data.model.LoginRequest
 import br.edu.fatecpg.projetorualivremobile.data.model.NivelAlagamento
 import br.edu.fatecpg.projetorualivremobile.data.model.ParaconsistentAnalysis
+import br.edu.fatecpg.projetorualivremobile.data.model.RegiaoCount
 import br.edu.fatecpg.projetorualivremobile.data.model.RegisterRequest
 import br.edu.fatecpg.projetorualivremobile.data.model.StatusCamera
 import br.edu.fatecpg.projetorualivremobile.data.model.StatusCameraRequest
@@ -141,11 +142,11 @@ class FakeApiService : RuaLivreApi {
     override suspend fun getCameras(): List<Camera> {
         delay(800)
         return listOf(
-            Camera("cam1", "Câmera Centro", -23.5505, -46.6333, "Centro", StatusCamera.ATIVA, true),
-            Camera("cam2", "Câmera Liberdade", -23.5489, -46.6388, "Liberdade", StatusCamera.ATIVA, true),
-            Camera("cam3", "Câmera Pinheiros", -23.5521, -46.6412, "Pinheiros", StatusCamera.MANUTENCAO, false),
-            Camera("cam4", "Câmera Consolação", -23.5560, -46.6450, "Consolação", StatusCamera.ATIVA, true),
-            Camera("cam5", "Câmera Jardins", -23.5480, -46.6300, "Jardins", StatusCamera.INATIVA, false)
+            Camera(id = "cam1", localizacao = "Câmera Centro", statusRaw = "ativo", latitude = -23.5505, longitude = -46.6333, bairro = "Centro"),
+            Camera(id = "cam2", localizacao = "Câmera Liberdade", statusRaw = "ativo", latitude = -23.5489, longitude = -46.6388, bairro = "Liberdade"),
+            Camera(id = "cam3", localizacao = "Câmera Pinheiros", statusRaw = "manutencao", latitude = -23.5521, longitude = -46.6412, bairro = "Pinheiros"),
+            Camera(id = "cam4", localizacao = "Câmera Consolação", statusRaw = "ativo", latitude = -23.5560, longitude = -46.6450, bairro = "Consolação"),
+            Camera(id = "cam5", localizacao = "Câmera Jardins", statusRaw = "inativo", latitude = -23.5480, longitude = -46.6300, bairro = "Jardins")
         )
     }
 
@@ -156,7 +157,7 @@ class FakeApiService : RuaLivreApi {
 
     override suspend fun createCamera(request: CreateCameraRequest): Camera {
         delay(500)
-        return Camera("cam_new", request.nome, request.latitude, request.longitude, request.bairro)
+        return Camera(id = "cam_new", localizacao = request.nome, latitude = request.latitude, longitude = request.longitude, bairro = request.bairro)
     }
 
     override suspend fun updateCameraStatus(cameraId: String, request: StatusCameraRequest): Camera {
@@ -223,20 +224,24 @@ class FakeApiService : RuaLivreApi {
     override suspend fun getDashboardStats(): DashboardStats {
         delay(600)
         return DashboardStats(
-            totalCameras = 5,
-            camerasAtivas = 3,
-            alagamentosAtivos = 4,
-            alagamentosHoje = 6
+            totalAlagamentosAtivos = 4,
+            totalCamerasAtivas = 3,
+            totalAlertasHoje = 6,
+            alagamentosPorRegiao = listOf(
+                RegiaoCount("Centro", 2),
+                RegiaoCount("Zona Sul", 1),
+                RegiaoCount("Zona Norte", 1)
+            )
         )
     }
 
     override suspend fun getHistorico(dias: Int): List<HistoricoEntry> {
         delay(600)
         return listOf(
-            HistoricoEntry("2024-01-15", 6, 3),
-            HistoricoEntry("2024-01-14", 3, 4),
-            HistoricoEntry("2024-01-13", 1, 4),
-            HistoricoEntry("2024-01-12", 4, 3)
+            HistoricoEntry("2024-01-12", 4, 28.0),
+            HistoricoEntry("2024-01-13", 1, 12.0),
+            HistoricoEntry("2024-01-14", 3, 35.0),
+            HistoricoEntry("2024-01-15", 6, 52.0)
         )
     }
 
