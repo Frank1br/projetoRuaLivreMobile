@@ -3,6 +3,7 @@ package br.edu.fatecpg.projetorualivremobile.ui.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.edu.fatecpg.projetorualivremobile.data.model.Alerta
+import br.edu.fatecpg.projetorualivremobile.data.model.NivelAlagamento
 import br.edu.fatecpg.projetorualivremobile.data.repository.AlagamentoRepository
 import br.edu.fatecpg.projetorualivremobile.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,9 +52,9 @@ class HomeViewModel @Inject constructor(
 
             val total = alagamentos.size.coerceAtLeast(1)
 
-            val alagados = alagamentos.count { it.nivel_agua > 50 }      // grave
-            val afetados = alagamentos.count { it.nivel_agua in 20.0..50.0 }
-            val livres = alagamentos.count { it.nivel_agua < 20 }
+            val alagados = alagamentos.count { it.nivel == NivelAlagamento.CRITICO || it.nivel == NivelAlagamento.ALTO }
+            val afetados = alagamentos.count { it.nivel == NivelAlagamento.MEDIO }
+            val livres = alagamentos.count { it.nivel == NivelAlagamento.BAIXO }
 
             _uiState.update {
                 it.copy(
