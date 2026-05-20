@@ -1,5 +1,6 @@
 package br.edu.fatecpg.projetorualivremobile.di
 
+import br.edu.fatecpg.projetorualivremobile.BuildConfig
 import br.edu.fatecpg.projetorualivremobile.data.remote.RuaLivreApi
 import br.edu.fatecpg.projetorualivremobile.data.repository.TokenStore
 import br.edu.fatecpg.projetorualivremobile.util.AuthEventBus
@@ -19,8 +20,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    // 10.0.2.2 = localhost do PC no emulador Android. Altere para a URL real do servidor.
-    private const val BASE_URL = "http://192.168.2.73:8000/"
+    // Vem de BuildConfig (gerado a partir de api.base_url em local.properties).
+    private val BASE_URL: String = BuildConfig.API_BASE_URL
 
     @Provides
     @Singleton
