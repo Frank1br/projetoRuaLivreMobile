@@ -1,12 +1,10 @@
 package br.edu.fatecpg.projetorualivremobile.ui.screens.splash
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -16,27 +14,35 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import br.edu.fatecpg.projetorualivremobile.ui.theme.IndigoPrimario
-import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen(onNavigateToLogin: () -> Unit) {
-    LaunchedEffect(Unit) {
-        delay(2500)
-        onNavigateToLogin()
+fun SplashScreen(
+    onNavigateToLogin: () -> Unit,
+    onNavigateToHome: () -> Unit,
+    viewModel: SplashViewModel = hiltViewModel()
+) {
+    val destination by viewModel.destination.collectAsState()
+
+    LaunchedEffect(destination) {
+        when (destination) {
+            SplashDestination.LOGIN -> onNavigateToLogin()
+            SplashDestination.HOME -> onNavigateToHome()
+            SplashDestination.LOADING -> Unit
+        }
     }
 
     Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable { onNavigateToLogin() },
+        modifier = Modifier.fillMaxSize(),
         color = IndigoPrimario
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -75,16 +81,6 @@ fun SplashScreen(onNavigateToLogin: () -> Unit) {
                     letterSpacing = 3.sp
                 )
             }
-
-            Text(
-                text = "Toque para continuar",
-                fontSize = 13.sp,
-                color = Color.White.copy(alpha = 0.5f),
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 48.dp)
-            )
         }
     }
 }

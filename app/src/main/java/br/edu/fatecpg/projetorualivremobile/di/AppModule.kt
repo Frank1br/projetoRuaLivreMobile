@@ -2,6 +2,7 @@ package br.edu.fatecpg.projetorualivremobile.di
 
 import br.edu.fatecpg.projetorualivremobile.data.remote.RuaLivreApi
 import br.edu.fatecpg.projetorualivremobile.data.repository.TokenStore
+import br.edu.fatecpg.projetorualivremobile.util.AuthEventBus
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,6 +12,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
 import javax.inject.Singleton
 
 @Module
@@ -22,13 +24,36 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAuthInterceptor(tokenStore: TokenStore): Interceptor = Interceptor { chain ->
+    fun provideAuthInterceptor(
+        tokenStore: TokenStore,
+        authEventBus: AuthEventBus
+    ): Interceptor = Interceptor { chain ->
+        val original = chain.request()
         val request = tokenStore.token?.let { token ->
-            chain.request().newBuilder()
+            original.newBuilder()
                 .addHeader("Authorization", "Bearer $token")
                 .build()
-        } ?: chain.request()
-        chain.proceed(request)
+        } ?: original
+
+        val response = try {
+            chain.proceed(request)
+        } catch (e: IOException) {
+            authEventBus.notifyError("Sem conexão com o servidor. Verifique sua internet.")
+            throw e
+        }
+
+        // 401 em endpoint protegido → sessão expirou.
+        // Ignora /auth/login e /auth/register (401 ali é credencial inválida, não sessão expirada).
+        if (response.code == 401) {
+            val path = request.url.encodedPath
+            val isAuthAttempt = path.endsWith("/auth/login") || path.endsWith("/auth/register")
+            if (!isAuthAttempt && tokenStore.token != null) {
+                tokenStore.token = null
+                authEventBus.notifySessionExpired()
+            }
+        }
+
+        response
     }
 
     @Provides
@@ -54,6 +79,4 @@ object AppModule {
     @Singleton
     fun provideRuaLivreApi(retrofit: Retrofit): RuaLivreApi =
         retrofit.create(RuaLivreApi::class.java)
-    // Para usar dados offline/fake, substitua pela linha abaixo:
-    // FakeApiService()
 }

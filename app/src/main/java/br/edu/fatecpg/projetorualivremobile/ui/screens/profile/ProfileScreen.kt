@@ -17,13 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Report
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -35,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -125,36 +118,6 @@ fun ProfileScreen(
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    ProfileMenuItem(
-                        icon = Icons.Default.Edit,
-                        label = "Editar perfil",
-                        onClick = {}
-                    )
-                    HorizontalDivider(color = Color(0xFFF0F0F5), thickness = 1.dp, modifier = Modifier.padding(start = 56.dp))
-
-                    ProfileMenuItem(
-                        icon = Icons.Default.Notifications,
-                        label = "Notificações",
-                        onClick = {}
-                    )
-                    HorizontalDivider(color = Color(0xFFF0F0F5), thickness = 1.dp, modifier = Modifier.padding(start = 56.dp))
-
-                    ProfileMenuItem(
-                        icon = Icons.Default.Settings,
-                        label = "Configurações",
-                        onClick = {}
-                    )
-                    HorizontalDivider(color = Color(0xFFF0F0F5), thickness = 1.dp, modifier = Modifier.padding(start = 56.dp))
-
-                    ProfileMenuItem(
-                        icon = Icons.Default.Report,
-                        label = "Meus alertas",
-                        onClick = {}
-                    )
-                    HorizontalDivider(color = Color(0xFFF0F0F5), thickness = 1.dp)
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
                     // Logout
                     Row(
                         modifier = Modifier
@@ -191,46 +154,3 @@ fun ProfileScreen(
     }
 }
 
-@Composable
-private fun ProfileMenuItem(
-    icon: ImageVector,
-    label: String,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Surface(
-            modifier = Modifier.size(36.dp),
-            shape = CircleShape,
-            color = IndigoPrimario.copy(alpha = 0.08f)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = IndigoPrimario,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = label,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color(0xFF1A1A2E),
-            modifier = Modifier.weight(1f)
-        )
-        Icon(
-            imageVector = Icons.Default.ChevronRight,
-            contentDescription = null,
-            tint = Color(0xFFBBBBCC),
-            modifier = Modifier.size(20.dp)
-        )
-    }
-}

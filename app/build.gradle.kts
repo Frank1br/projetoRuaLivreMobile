@@ -76,6 +76,9 @@ dependencies {
     // Map (OpenStreetMap - sem API key)
     implementation(libs.osmdroid)
 
+    // Encrypted token storage
+    implementation(libs.androidx.security.crypto)
+
     // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

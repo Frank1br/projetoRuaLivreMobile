@@ -133,18 +133,7 @@ fun LoginScreen(
                     isPassword = true
                 )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = {}) {
-                        Text(
-                            text = "Esqueceu a senha?",
-                            color = IndigoPrimario,
-                            fontSize = 13.sp
-                        )
-                    }
-                }
+                Spacer(modifier = Modifier.height(8.dp))
 
                 uiState.error?.let {
                     Text(
