@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -90,18 +91,16 @@ fun DashboardScreen(
             )
         }
     ) { paddingValues ->
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) { CircularProgressIndicator(color = IndigoPrimario) }
-        } else {
+        PullToRefreshBox(
+            isRefreshing = uiState.isLoading,
+            onRefresh = viewModel::carregarDados,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -238,6 +237,62 @@ fun DashboardScreen(
 
                                 Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                                     LegendRow(color = IndigoPrimario, label = "Ocorrências de alagamento")
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Alagamentos por região
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Text(
+                                text = "Alagamentos por região",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF1A1A2E)
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            if (uiState.porRegiao.isEmpty()) {
+                                Text(
+                                    text = "Sem alagamentos ativos por região.",
+                                    fontSize = 13.sp,
+                                    color = Color(0xFF9999AA)
+                                )
+                            } else {
+                                uiState.porRegiao.forEach { regiao ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 8.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = regiao.regiao,
+                                            fontSize = 14.sp,
+                                            color = Color(0xFF1A1A2E)
+                                        )
+                                        Surface(
+                                            shape = RoundedCornerShape(10.dp),
+                                            color = IndigoPrimario.copy(alpha = 0.10f)
+                                        ) {
+                                            Text(
+                                                text = "${regiao.total}",
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = IndigoPrimario,
+                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

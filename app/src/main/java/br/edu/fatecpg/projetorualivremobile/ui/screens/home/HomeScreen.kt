@@ -1,6 +1,7 @@
 package br.edu.fatecpg.projetorualivremobile.ui.screens.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,14 +27,21 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +60,7 @@ private val BackgroundColor = Color(0xFFF3F4F8)
 private val TextDark = Color(0xFF1A1A2E)
 private val TextGray = Color(0xFF9999AA)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToMap: () -> Unit,
@@ -60,6 +69,8 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var selectedAlerta by remember { mutableStateOf<Alerta?>(null) }
+    val sheetState = rememberModalBottomSheetState()
 
     Scaffold(
         containerColor = BackgroundColor,
@@ -73,18 +84,15 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) { CircularProgressIndicator(color = IndigoPrimario) }
-        } else {
+        PullToRefreshBox(
+            isRefreshing = uiState.isLoading,
+            onRefresh = viewModel::carregarDados,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+                modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
                 // ── Greeting ──────────────────────────────────────────────
@@ -265,6 +273,7 @@ fun HomeScreen(
                 items(uiState.alertas) { alerta ->
                     AlertaItem(
                         alerta = alerta,
+                        onClick = { selectedAlerta = alerta },
                         modifier = Modifier
                             .padding(horizontal = 20.dp)
                             .padding(bottom = 8.dp)
@@ -272,6 +281,41 @@ fun HomeScreen(
                 }
 
                 item { Spacer(modifier = Modifier.height(8.dp)) }
+            }
+        }
+    }
+
+    selectedAlerta?.let { alerta ->
+        ModalBottomSheet(
+            onDismissRequest = { selectedAlerta = null },
+            sheetState = sheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 24.dp, end = 24.dp, bottom = 32.dp)
+            ) {
+                Text(
+                    text = "Alerta de alagamento",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextDark
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = alerta.mensagem,
+                    fontSize = 14.sp,
+                    color = TextDark,
+                    lineHeight = 20.sp
+                )
+                alerta.dataEnvio?.let { data ->
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Recebido em ${data.take(16)}",
+                        fontSize = 12.sp,
+                        color = TextGray
+                    )
+                }
             }
         }
     }
@@ -358,12 +402,18 @@ private fun QuickAccessCard(
 }
 
 @Composable
-private fun AlertaItem(alerta: Alerta, modifier: Modifier = Modifier) {
+private fun AlertaItem(
+    alerta: Alerta,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
 
     val dotColor = AlertaMedioColor
 
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
