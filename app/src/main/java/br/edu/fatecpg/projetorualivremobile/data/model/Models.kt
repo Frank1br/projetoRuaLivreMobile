@@ -149,6 +149,7 @@ data class DashboardStats(
     @SerializedName("total_alagamentos_ativos") val totalAlagamentosAtivos: Int = 0,
     @SerializedName("total_cameras_ativas") val totalCamerasAtivas: Int = 0,
     @SerializedName("total_alertas_hoje") val totalAlertasHoje: Int = 0,
+    @SerializedName("total_bairros_monitorados") val totalBairrosMonitorados: Int = 0,
     @SerializedName("alagamentos_por_regiao") val alagamentosPorRegiao: List<RegiaoCount> = emptyList()
 )
 

@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.edu.fatecpg.projetorualivremobile.data.model.Alerta
 import br.edu.fatecpg.projetorualivremobile.ui.components.BottomBar
+import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaBaixoColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaMedioColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.IndigoPrimario
 
@@ -146,71 +147,92 @@ fun HomeScreen(
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            // Alerta header
+                            val temAlagamento = uiState.bairrosAtingidos > 0
+                            val headerColor = if (temAlagamento) AlertaMedioColor else AlertaBaixoColor
+                            val headerLabel = if (temAlagamento) "Alerta ativo" else "Tudo tranquilo"
+
+                            // Header
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.Warning,
                                     contentDescription = null,
-                                    tint = AlertaMedioColor,
+                                    tint = headerColor,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = "Alerta ativo",
+                                    text = headerLabel,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = AlertaMedioColor
+                                    color = headerColor
                                 )
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            // Count row
+                            // Métrica principal: cobertura da cidade
                             Row(verticalAlignment = Alignment.Bottom) {
                                 Text(
-                                    text = "${uiState.totalBairros}",
+                                    text = "${uiState.bairrosAtingidos}",
                                     fontSize = 44.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = TextDark,
                                     lineHeight = 44.sp
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "bairros com alagamento",
-                                    fontSize = 13.sp,
-                                    color = TextGray,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
+                                Column(modifier = Modifier.padding(bottom = 6.dp)) {
+                                    if (uiState.totalBairrosMonitorados > 0) {
+                                        Text(
+                                            text = "de ${uiState.totalBairrosMonitorados} bairros (${uiState.pctAtingidos}%)",
+                                            fontSize = 13.sp,
+                                            color = TextDark,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                        Text(
+                                            text = "com alagamento ativo",
+                                            fontSize = 12.sp,
+                                            color = TextGray
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "bairros com alagamento ativo",
+                                            fontSize = 13.sp,
+                                            color = TextGray
+                                        )
+                                    }
+                                }
                             }
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                            if (temAlagamento) {
+                                Spacer(modifier = Modifier.height(12.dp))
 
-                            // Stats chips
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                StatChip(
-                                    percent = uiState.pctAlagados,
-                                    label = "Alagados",
-                                    bgColor = Color(0xFFFFE5E5),
-                                    textColor = Color(0xFFB71C1C),
-                                    modifier = Modifier.weight(1f)
-                                )
-                                StatChip(
-                                    percent = uiState.pctAfetados,
-                                    label = "Poucos afetados",
-                                    bgColor = Color(0xFFE8EAF6),
-                                    textColor = IndigoPrimario,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                StatChip(
-                                    percent = uiState.pctLivres,
-                                    label = "Livres",
-                                    bgColor = Color(0xFFE8F5E9),
-                                    textColor = Color(0xFF1B5E20),
-                                    modifier = Modifier.weight(1f)
-                                )
+                                // Distribuição por gravidade — contagens absolutas
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    SeverityChip(
+                                        count = uiState.nCriticoAlto,
+                                        label = "Crítico/Alto",
+                                        bgColor = Color(0xFFFFE5E5),
+                                        textColor = Color(0xFFB71C1C),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    SeverityChip(
+                                        count = uiState.nMedio,
+                                        label = "Médio",
+                                        bgColor = Color(0xFFE8EAF6),
+                                        textColor = IndigoPrimario,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    SeverityChip(
+                                        count = uiState.nBaixo,
+                                        label = "Baixo",
+                                        bgColor = Color(0xFFE8F5E9),
+                                        textColor = Color(0xFF1B5E20),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
                             }
                         }
                     }
@@ -325,8 +347,8 @@ fun HomeScreen(
 // ── Sub-components ─────────────────────────────────────────────────────────
 
 @Composable
-private fun StatChip(
-    percent: Int,
+private fun SeverityChip(
+    count: Int,
     label: String,
     bgColor: Color,
     textColor: Color,
@@ -341,7 +363,7 @@ private fun StatChip(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "$percent%",
+                text = "$count",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = textColor
