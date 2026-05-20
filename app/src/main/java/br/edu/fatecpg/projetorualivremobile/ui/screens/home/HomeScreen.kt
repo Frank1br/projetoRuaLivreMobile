@@ -288,7 +288,8 @@ fun HomeScreen(
     selectedAlerta?.let { alerta ->
         ModalBottomSheet(
             onDismissRequest = { selectedAlerta = null },
-            sheetState = sheetState
+            sheetState = sheetState,
+            containerColor = Color.White
         ) {
             Column(
                 modifier = Modifier
