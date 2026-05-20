@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Permite tráfego HTTP cleartext em qualquer domínio. Necessário porque a
+    API roda em HTTP no IP local da LAN, que muda conforme a rede em que o
+    notebook está (casa, faculdade, hotspot). Em produção (release com
+    HTTPS), trocar por uma política mais restrita.
+-->
 <network-security-config>
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">192.168.2.10</domain>
-        <domain includeSubdomains="true">192.168.2.73</domain>
-        <domain includeSubdomains="true">10.0.2.2</domain>
-        <domain includeSubdomains="true">localhost</domain>
-    </domain-config>
+    <base-config cleartextTrafficPermitted="true" />
 </network-security-config>
