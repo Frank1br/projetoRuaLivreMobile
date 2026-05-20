@@ -188,8 +188,11 @@ fun HomeScreen(
                                             color = TextDark,
                                             fontWeight = FontWeight.Medium
                                         )
+                                        val ocorrencias = if (uiState.totalAlagamentos > 0)
+                                            " · ${uiState.totalAlagamentos} ocorrência${if (uiState.totalAlagamentos == 1) "" else "s"}"
+                                        else ""
                                         Text(
-                                            text = "com alagamento ativo",
+                                            text = "com alagamento ativo$ocorrencias",
                                             fontSize = 12.sp,
                                             color = TextGray
                                         )
