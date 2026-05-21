@@ -130,6 +130,19 @@ data class LocalizacaoCameraRequest(
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
+// Reportes de alagamento feitos por usuários (com foto). TTL de 24h no backend.
+data class AlagamentoReportado(
+    @SerializedName("id") val id: Int = 0,
+    @SerializedName("usuario_id") val usuarioId: Int = 0,
+    @SerializedName("latitude") val latitude: Double = 0.0,
+    @SerializedName("longitude") val longitude: Double = 0.0,
+    @SerializedName("descricao") val descricao: String? = null,
+    @SerializedName("foto_url") val fotoUrl: String = "",
+    @SerializedName("criado_em") val criadoEm: String = "",
+    @SerializedName("expira_em") val expiraEm: String = "",
+    @SerializedName("status") val status: String = "ativo"
+)
+
 // Espelha o retorno de /dashboard/alertas (sem campo de nível).
 data class Alerta(
     @SerializedName("id") val id: String = "",

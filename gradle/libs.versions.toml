@@ -20,6 +20,8 @@ retrofit = "2.9.0"
 okhttp = "4.12.0"
 osmdroid = "6.1.18"
 securityCrypto = "1.1.0-alpha06"
+playServicesLocation = "21.3.0"
+coil = "3.0.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,6 +41,11 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 osmdroid = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
 # Security (EncryptedSharedPreferences)
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
+# Location (FusedLocationProviderClient)
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+# Coil 3 (image loading)
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 # Compose
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }

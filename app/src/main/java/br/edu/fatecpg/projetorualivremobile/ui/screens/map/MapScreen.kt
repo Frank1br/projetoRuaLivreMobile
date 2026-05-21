@@ -58,6 +58,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import br.edu.fatecpg.projetorualivremobile.data.model.Alagamento
+import br.edu.fatecpg.projetorualivremobile.data.model.AlagamentoReportado
 import br.edu.fatecpg.projetorualivremobile.data.model.Camera
 import br.edu.fatecpg.projetorualivremobile.data.model.NivelAlagamento
 import br.edu.fatecpg.projetorualivremobile.data.model.StatusCamera
@@ -231,6 +232,21 @@ fun MapScreen(
                     }
                 }
 
+                // Marcadores de reports de usuário (foto + GPS, TTL 24h)
+                uiState.reports.forEach { report ->
+                    Marker(mv).apply {
+                        position = GeoPoint(report.latitude, report.longitude)
+                        icon = buildReportDrawable(context)
+                        title = null
+                        infoWindow = null
+                        setOnMarkerClickListener(Marker.OnMarkerClickListener { _, _ ->
+                            viewModel.selectReport(report)
+                            true
+                        })
+                        mv.overlays.add(this)
+                    }
+                }
+
                 mv.invalidate()
             }
 
@@ -287,6 +303,29 @@ fun MapScreen(
                     )
                 }
             }
+
+            // ── Painel report selecionado ─────────────────────────────────────
+            AnimatedVisibility(
+                visible = uiState.selectedReport != null,
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) {
+                uiState.selectedReport?.let { report ->
+                    ReportInfoPanel(
+                        report = report,
+                        onDismiss = viewModel::clearSelection,
+                        onRemover = { viewModel.removerReport(report.id) }
+                    )
+                }
+            }
+
+            // ── Botão flutuante de reporte com foto ───────────────────────────
+            ReportCaptureFlow(
+                viewModel = viewModel,
+                onLocationError = { msg -> viewModel.notifyError(msg) },
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }
@@ -525,6 +564,120 @@ private fun buildCameraDrawable(context: Context, color: Int): BitmapDrawable {
     )
 
     return BitmapDrawable(context.resources, bitmap)
+}
+
+private fun buildReportDrawable(context: Context): BitmapDrawable {
+    val density = context.resources.displayMetrics.density
+    val px = (32 * density).toInt()
+    val bitmap = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+
+    // Círculo laranja com borda branca
+    val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.rgb(245, 124, 0)
+    }
+    canvas.drawCircle(px / 2f, px / 2f, px / 2f - density, fill)
+
+    val border = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.WHITE
+        style = Paint.Style.STROKE
+        strokeWidth = 3 * density
+    }
+    canvas.drawCircle(px / 2f, px / 2f, px / 2f - density - 1, border)
+
+    // "!" branco no centro
+    val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.WHITE
+        textSize = 18 * density
+        textAlign = Paint.Align.CENTER
+        typeface = android.graphics.Typeface.DEFAULT_BOLD
+    }
+    val baseline = px / 2f - (textPaint.descent() + textPaint.ascent()) / 2f
+    canvas.drawText("!", px / 2f, baseline, textPaint)
+
+    return BitmapDrawable(context.resources, bitmap)
+}
+
+@Composable
+private fun ReportInfoPanel(
+    report: AlagamentoReportado,
+    onDismiss: () -> Unit,
+    onRemover: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Water,
+                        contentDescription = null,
+                        tint = AlertaMedioColor,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Reporte de morador",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = AlertaMedioColor
+                    )
+                }
+                IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Close, contentDescription = "Fechar", tint = Color(0xFF9E9EAF))
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            coil3.compose.AsyncImage(
+                model = report.fotoUrl,
+                contentDescription = "Foto do local",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            report.descricao?.takeIf { it.isNotBlank() }?.let { desc ->
+                Text(
+                    text = desc,
+                    fontSize = 14.sp,
+                    color = Color(0xFF1A1A2E)
+                )
+                Spacer(Modifier.height(4.dp))
+            }
+
+            if (report.expiraEm.isNotBlank()) {
+                Text(
+                    text = "Expira em ${report.expiraEm.take(16)}",
+                    fontSize = 12.sp,
+                    color = Color(0xFF888899)
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            androidx.compose.material3.TextButton(
+                onClick = onRemover,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Remover este reporte", color = Color(0xFFD32F2F))
+            }
+        }
+    }
 }
 
 private fun buildCirclePolygon(center: GeoPoint, radiusMeters: Double, fillColor: Int): Polygon {

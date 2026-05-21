@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import br.edu.fatecpg.projetorualivremobile.data.model.Alagamento
+import br.edu.fatecpg.projetorualivremobile.data.model.AlagamentoReportado
 import br.edu.fatecpg.projetorualivremobile.data.model.Alerta
 import br.edu.fatecpg.projetorualivremobile.data.model.TokenResponse
 import br.edu.fatecpg.projetorualivremobile.data.model.Camera
@@ -17,6 +18,9 @@ import br.edu.fatecpg.projetorualivremobile.data.model.StatusCameraRequest
 import br.edu.fatecpg.projetorualivremobile.data.model.Usuario
 import br.edu.fatecpg.projetorualivremobile.data.remote.RuaLivreApi
 import dagger.hilt.android.qualifiers.ApplicationContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -133,6 +137,34 @@ class AlagamentoRepository @Inject constructor(private val api: RuaLivreApi) {
     suspend fun getIpp(cameraId: String): Result<IppData> = runCatching {
         api.getIpp(cameraId)
     }
+}
+
+// ─── Reports de usuário (foto + coordenadas) ──────────────────────────────────
+
+@Singleton
+class ReportRepository @Inject constructor(private val api: RuaLivreApi) {
+
+    suspend fun listar(): Result<List<AlagamentoReportado>> = runCatching {
+        api.getReports()
+    }
+
+    suspend fun criar(
+        latitude: Double,
+        longitude: Double,
+        descricao: String?,
+        fotoJpeg: ByteArray
+    ): Result<AlagamentoReportado> = runCatching {
+        val plain = "text/plain".toMediaType()
+        val image = "image/jpeg".toMediaType()
+        val latPart = latitude.toString().toRequestBody(plain)
+        val lonPart = longitude.toString().toRequestBody(plain)
+        val descPart = descricao?.takeIf { it.isNotBlank() }?.toRequestBody(plain)
+        val fotoBody = fotoJpeg.toRequestBody(image, 0, fotoJpeg.size)
+        val fotoPart = MultipartBody.Part.createFormData("foto", "report.jpg", fotoBody)
+        api.criarReport(latPart, lonPart, descPart, fotoPart)
+    }
+
+    suspend fun remover(id: Int): Result<Unit> = runCatching { api.removerReport(id) }
 }
 
 // ─── Câmeras ──────────────────────────────────────────────────────────────────

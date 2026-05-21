@@ -92,6 +92,13 @@ dependencies {
     // Encrypted token storage
     implementation(libs.androidx.security.crypto)
 
+    // Location (GPS)
+    implementation(libs.play.services.location)
+
+    // Coil 3 (carregamento de imagens via URL)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
     // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

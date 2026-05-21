@@ -1,6 +1,7 @@
 package br.edu.fatecpg.projetorualivremobile.data.remote
 
 import br.edu.fatecpg.projetorualivremobile.data.model.Alagamento
+import br.edu.fatecpg.projetorualivremobile.data.model.AlagamentoReportado
 import br.edu.fatecpg.projetorualivremobile.data.model.Alerta
 import br.edu.fatecpg.projetorualivremobile.data.model.TokenResponse
 import br.edu.fatecpg.projetorualivremobile.data.model.Camera
@@ -20,11 +21,16 @@ import br.edu.fatecpg.projetorualivremobile.data.model.StatusCameraRequest
 import br.edu.fatecpg.projetorualivremobile.data.model.Usuario
 import br.edu.fatecpg.projetorualivremobile.util.PasswordValidator
 import kotlinx.coroutines.delay
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.HTTP
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -99,6 +105,23 @@ interface RuaLivreApi {
 
     @GET("dashboard/alertas")
     suspend fun getAlertas(@Query("limit") limit: Int): List<Alerta>
+
+    // ── Reports de usuário ────────────────────────────────────────────────────
+
+    @Multipart
+    @POST("reports/alagamentos")
+    suspend fun criarReport(
+        @Part("latitude") latitude: RequestBody,
+        @Part("longitude") longitude: RequestBody,
+        @Part("descricao") descricao: RequestBody?,
+        @Part foto: MultipartBody.Part
+    ): AlagamentoReportado
+
+    @GET("reports/alagamentos")
+    suspend fun getReports(): List<AlagamentoReportado>
+
+    @DELETE("reports/alagamentos/{id}")
+    suspend fun removerReport(@Path("id") id: Int)
 }
 
 // ─── FakeApiService ───────────────────────────────────────────────────────────
@@ -253,4 +276,23 @@ class FakeApiService : RuaLivreApi {
             Alerta(id = "3", alagamentoId = 3, mensagem = "Vila Nova: 2 ruas afetadas", enviado = true, dataEnvio = "2024-01-15 12:15")
         ).take(limit)
     }
+
+    // ── Reports (stubs) ───────────────────────────────────────────────────────
+
+    override suspend fun criarReport(
+        latitude: RequestBody,
+        longitude: RequestBody,
+        descricao: RequestBody?,
+        foto: MultipartBody.Part
+    ): AlagamentoReportado {
+        delay(500)
+        return AlagamentoReportado(id = 0)
+    }
+
+    override suspend fun getReports(): List<AlagamentoReportado> {
+        delay(300)
+        return emptyList()
+    }
+
+    override suspend fun removerReport(id: Int) { delay(200) }
 }
