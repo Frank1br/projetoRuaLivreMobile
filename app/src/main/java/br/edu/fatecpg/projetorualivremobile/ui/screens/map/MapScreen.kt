@@ -595,6 +595,20 @@ private fun MapControlAccordion(
                         LegendItem(color = AlertaMedioColor, label = "Médio")
                         LegendItem(color = AlertaBaixoColor, label = "Baixo")
                     }
+
+                    Text(
+                        text = "Reportes",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF666680),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        LegendItem(color = AlertaMedioColor, label = "Reporte de morador")
+                    }
                 }
             }
         }

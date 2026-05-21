@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -21,6 +24,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -170,6 +174,8 @@ fun ReportCaptureFlow(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .imePadding()
                     .padding(start = 24.dp, end = 24.dp, bottom = 32.dp)
             ) {
                 Text(
@@ -206,7 +212,23 @@ fun ReportCaptureFlow(
                     label = { Text("Descrição (opcional)") },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 3,
-                    enabled = !uiState.isSubmittingReport
+                    enabled = !uiState.isSubmittingReport,
+                    // Cores fixas em light — o app inteiro ignora dark mode.
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = IndigoPrimario,
+                        focusedLabelColor = IndigoPrimario,
+                        focusedTextColor = Color(0xFF1A1A2E),
+                        focusedContainerColor = Color.White,
+                        unfocusedBorderColor = Color(0xFFDDDDE8),
+                        unfocusedLabelColor = Color(0xFF9999AA),
+                        unfocusedTextColor = Color(0xFF1A1A2E),
+                        unfocusedContainerColor = Color.White,
+                        disabledTextColor = Color(0xFF1A1A2E),
+                        disabledBorderColor = Color(0xFFDDDDE8),
+                        disabledLabelColor = Color(0xFF9999AA),
+                        disabledContainerColor = Color.White,
+                        cursorColor = IndigoPrimario
+                    )
                 )
 
                 uiState.reportError?.let { erro ->
@@ -232,7 +254,12 @@ fun ReportCaptureFlow(
                     },
                     enabled = !uiState.isSubmittingReport,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = IndigoPrimario)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = IndigoPrimario,
+                        contentColor = Color.White,
+                        disabledContainerColor = IndigoPrimario.copy(alpha = 0.5f),
+                        disabledContentColor = Color.White.copy(alpha = 0.7f)
+                    )
                 ) {
                     if (uiState.isSubmittingReport) {
                         CircularProgressIndicator(
