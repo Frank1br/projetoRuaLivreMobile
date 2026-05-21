@@ -14,7 +14,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import br.edu.fatecpg.projetorualivremobile.ui.screens.changepwd.ChangePasswordScreen
 import br.edu.fatecpg.projetorualivremobile.ui.screens.dashboard.DashboardScreen
+import br.edu.fatecpg.projetorualivremobile.ui.screens.editprofile.EditProfileScreen
+import br.edu.fatecpg.projetorualivremobile.ui.screens.forgot.ForgotPasswordScreen
 import br.edu.fatecpg.projetorualivremobile.ui.screens.home.HomeScreen
 import br.edu.fatecpg.projetorualivremobile.ui.screens.login.LoginScreen
 import br.edu.fatecpg.projetorualivremobile.ui.screens.map.MapScreen
@@ -26,10 +29,13 @@ sealed class Route(val path: String) {
     object Splash : Route("splash")
     object Login : Route("login")
     object Register : Route("register")
+    object Forgot : Route("forgot")
     object Home : Route("home")
     object Map : Route("map")
     object Dashboard : Route("dashboard")
     object Profile : Route("profile")
+    object EditProfile : Route("edit_profile")
+    object ChangePassword : Route("change_password")
 }
 
 @Composable
@@ -81,7 +87,15 @@ fun AppNavHost(
                             popUpTo(Route.Login.path) { inclusive = true }
                         }
                     },
-                    onNavigateToRegister = { navController.navigate(Route.Register.path) }
+                    onNavigateToRegister = { navController.navigate(Route.Register.path) },
+                    onNavigateToForgot = { navController.navigate(Route.Forgot.path) }
+                )
+            }
+
+            composable(Route.Forgot.path) {
+                ForgotPasswordScreen(
+                    onDone = { navController.popBackStack() },
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
@@ -125,11 +139,27 @@ fun AppNavHost(
                     onNavigateToHome = { navController.navigate(Route.Home.path) },
                     onNavigateToMap = { navController.navigate(Route.Map.path) },
                     onNavigateToDashboard = { navController.navigate(Route.Dashboard.path) },
+                    onNavigateToEditProfile = { navController.navigate(Route.EditProfile.path) },
+                    onNavigateToChangePassword = { navController.navigate(Route.ChangePassword.path) },
                     onLogout = {
                         navController.navigate(Route.Login.path) {
                             popUpTo(0) { inclusive = true }
                         }
                     }
+                )
+            }
+
+            composable(Route.EditProfile.path) {
+                EditProfileScreen(
+                    onDone = { navController.popBackStack() },
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Route.ChangePassword.path) {
+                ChangePasswordScreen(
+                    onDone = { navController.popBackStack() },
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }

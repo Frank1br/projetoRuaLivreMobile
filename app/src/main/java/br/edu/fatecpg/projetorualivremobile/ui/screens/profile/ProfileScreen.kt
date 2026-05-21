@@ -17,7 +17,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -28,19 +32,24 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.edu.fatecpg.projetorualivremobile.ui.components.BottomBar
 import br.edu.fatecpg.projetorualivremobile.ui.theme.IndigoPrimario
+import coil3.compose.AsyncImage
 
 @Composable
 fun ProfileScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToMap: () -> Unit,
     onNavigateToDashboard: () -> Unit,
+    onNavigateToEditProfile: () -> Unit,
+    onNavigateToChangePassword: () -> Unit,
     onLogout: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
@@ -67,7 +76,7 @@ fun ProfileScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Dark header
+            // Header indigo com avatar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -76,20 +85,7 @@ fun ProfileScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Surface(
-                        modifier = Modifier.size(72.dp),
-                        shape = CircleShape,
-                        color = Color.White.copy(alpha = 0.2f)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = null,
-                                modifier = Modifier.size(38.dp),
-                                tint = Color.White
-                            )
-                        }
-                    }
+                    AvatarHeader(url = uiState.usuario?.avatarUrl)
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = uiState.usuario?.nome ?: "Usuário",
@@ -105,20 +101,31 @@ fun ProfileScreen(
                 }
             }
 
-            // White menu card
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .background(
-                        Color.White,
-                        RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp)
-                    )
+                    .background(Color.White, RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp))
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Logout
+                    ProfileMenuItem(
+                        icon = Icons.Default.Edit,
+                        label = "Editar perfil",
+                        onClick = onNavigateToEditProfile
+                    )
+                    HorizontalDivider(color = Color(0xFFF0F0F5), thickness = 1.dp, modifier = Modifier.padding(start = 56.dp))
+
+                    ProfileMenuItem(
+                        icon = Icons.Default.Lock,
+                        label = "Trocar senha",
+                        onClick = onNavigateToChangePassword
+                    )
+                    HorizontalDivider(color = Color(0xFFF0F0F5), thickness = 1.dp)
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -154,3 +161,72 @@ fun ProfileScreen(
     }
 }
 
+@Composable
+private fun AvatarHeader(url: String?) {
+    Surface(
+        modifier = Modifier.size(80.dp),
+        shape = CircleShape,
+        color = Color.White.copy(alpha = 0.2f)
+    ) {
+        if (!url.isNullOrBlank()) {
+            AsyncImage(
+                model = url,
+                contentDescription = "Avatar",
+                modifier = Modifier.size(80.dp).clip(CircleShape)
+            )
+        } else {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(42.dp),
+                    tint = Color.White
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProfileMenuItem(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            modifier = Modifier.size(36.dp),
+            shape = CircleShape,
+            color = IndigoPrimario.copy(alpha = 0.08f)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = IndigoPrimario,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = label,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF1A1A2E),
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = Color(0xFFBBBBCC),
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}

@@ -6,6 +6,11 @@ import androidx.security.crypto.MasterKey
 import br.edu.fatecpg.projetorualivremobile.data.model.Alagamento
 import br.edu.fatecpg.projetorualivremobile.data.model.AlagamentoReportado
 import br.edu.fatecpg.projetorualivremobile.data.model.Alerta
+import br.edu.fatecpg.projetorualivremobile.data.model.AvatarPadrao
+import br.edu.fatecpg.projetorualivremobile.data.model.ChangePasswordRequest
+import br.edu.fatecpg.projetorualivremobile.data.model.ForgotPasswordRequest
+import br.edu.fatecpg.projetorualivremobile.data.model.ResetPasswordRequest
+import br.edu.fatecpg.projetorualivremobile.data.model.UpdatePerfilRequest
 import br.edu.fatecpg.projetorualivremobile.data.model.TokenResponse
 import br.edu.fatecpg.projetorualivremobile.data.model.Camera
 import br.edu.fatecpg.projetorualivremobile.data.model.DashboardStats
@@ -86,6 +91,37 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun getMe(): Result<Usuario> = runCatching { api.getMe() }
+
+    suspend fun atualizarPerfil(nome: String?, avatarUrl: String?): Result<Usuario> = runCatching {
+        val updated = api.atualizarPerfil(UpdatePerfilRequest(nome = nome, avatarUrl = avatarUrl))
+        currentUser = updated
+        updated
+    }
+
+    suspend fun trocarSenha(senhaAtual: String, novaSenha: String): Result<Unit> = runCatching {
+        api.trocarSenha(ChangePasswordRequest(senhaAtual, novaSenha))
+    }
+
+    suspend fun esqueciSenha(email: String): Result<Unit> = runCatching {
+        api.esqueciSenha(ForgotPasswordRequest(email.trim().lowercase()))
+    }
+
+    suspend fun resetarSenha(email: String, codigo: String, novaSenha: String): Result<Unit> = runCatching {
+        api.resetarSenha(ResetPasswordRequest(email.trim().lowercase(), codigo.trim(), novaSenha))
+    }
+
+    suspend fun getAvataresPadrao(): Result<List<AvatarPadrao>> = runCatching {
+        api.getAvataresPadrao()
+    }
+
+    suspend fun uploadAvatar(fotoJpeg: ByteArray): Result<Usuario> = runCatching {
+        val image = "image/jpeg".toMediaType()
+        val body = fotoJpeg.toRequestBody(image, 0, fotoJpeg.size)
+        val part = MultipartBody.Part.createFormData("foto", "avatar.jpg", body)
+        val updated = api.uploadAvatar(part)
+        currentUser = updated
+        updated
+    }
 
     /** Verifica se há token persistido e tenta restaurar a sessão chamando /auth/me. */
     suspend fun bootstrap(): Boolean {

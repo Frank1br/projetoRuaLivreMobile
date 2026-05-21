@@ -3,6 +3,11 @@ package br.edu.fatecpg.projetorualivremobile.data.remote
 import br.edu.fatecpg.projetorualivremobile.data.model.Alagamento
 import br.edu.fatecpg.projetorualivremobile.data.model.AlagamentoReportado
 import br.edu.fatecpg.projetorualivremobile.data.model.Alerta
+import br.edu.fatecpg.projetorualivremobile.data.model.AvatarPadrao
+import br.edu.fatecpg.projetorualivremobile.data.model.ChangePasswordRequest
+import br.edu.fatecpg.projetorualivremobile.data.model.ForgotPasswordRequest
+import br.edu.fatecpg.projetorualivremobile.data.model.ResetPasswordRequest
+import br.edu.fatecpg.projetorualivremobile.data.model.UpdatePerfilRequest
 import br.edu.fatecpg.projetorualivremobile.data.model.TokenResponse
 import br.edu.fatecpg.projetorualivremobile.data.model.Camera
 import br.edu.fatecpg.projetorualivremobile.data.model.CreateCameraRequest
@@ -47,6 +52,25 @@ interface RuaLivreApi {
 
     @GET("auth/me")
     suspend fun getMe(): Usuario
+
+    @PATCH("auth/me")
+    suspend fun atualizarPerfil(@Body request: UpdatePerfilRequest): Usuario
+
+    @POST("auth/me/change-password")
+    suspend fun trocarSenha(@Body request: ChangePasswordRequest)
+
+    @POST("auth/forgot-password")
+    suspend fun esqueciSenha(@Body request: ForgotPasswordRequest)
+
+    @POST("auth/reset-password")
+    suspend fun resetarSenha(@Body request: ResetPasswordRequest)
+
+    @GET("avatars/padroes")
+    suspend fun getAvataresPadrao(): List<AvatarPadrao>
+
+    @Multipart
+    @POST("auth/me/avatar")
+    suspend fun uploadAvatar(@Part foto: MultipartBody.Part): Usuario
 
     // ── Câmeras ───────────────────────────────────────────────────────────────
 
@@ -295,4 +319,32 @@ class FakeApiService : RuaLivreApi {
     }
 
     override suspend fun removerReport(id: Int) { delay(200) }
+
+    // ── Perfil / Auth extras (stubs) ──────────────────────────────────────────
+
+    override suspend fun atualizarPerfil(request: UpdatePerfilRequest): Usuario {
+        delay(200)
+        return fakeUsuario.copy(
+            nome = request.nome ?: fakeUsuario.nome,
+            avatarUrl = request.avatarUrl ?: fakeUsuario.avatarUrl
+        )
+    }
+
+    override suspend fun trocarSenha(request: ChangePasswordRequest) { delay(200) }
+    override suspend fun esqueciSenha(request: ForgotPasswordRequest) { delay(200) }
+    override suspend fun resetarSenha(request: ResetPasswordRequest) { delay(200) }
+
+    override suspend fun getAvataresPadrao(): List<AvatarPadrao> {
+        delay(150)
+        return listOf(
+            AvatarPadrao("azul", "Indigo", "https://example.com/azul.svg"),
+            AvatarPadrao("laranja", "Laranja", "https://example.com/laranja.svg"),
+            AvatarPadrao("verde", "Verde", "https://example.com/verde.svg")
+        )
+    }
+
+    override suspend fun uploadAvatar(foto: MultipartBody.Part): Usuario {
+        delay(300)
+        return fakeUsuario
+    }
 }

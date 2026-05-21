@@ -9,7 +9,34 @@ data class Usuario(
     @SerializedName("nome") val nome: String,
     @SerializedName("email") val email: String,
     @SerializedName("nivel_acesso") val nivelAcesso: String = "usuario",
-    @SerializedName("status") val status: String = "ativo"
+    @SerializedName("status") val status: String = "ativo",
+    @SerializedName("avatar_url") val avatarUrl: String? = null
+)
+
+data class AvatarPadrao(
+    @SerializedName("id") val id: String = "",
+    @SerializedName("nome") val nome: String = "",
+    @SerializedName("url") val url: String = ""
+)
+
+data class ForgotPasswordRequest(
+    @SerializedName("email") val email: String
+)
+
+data class ResetPasswordRequest(
+    @SerializedName("email") val email: String,
+    @SerializedName("codigo") val codigo: String,
+    @SerializedName("nova_senha") val novaSenha: String
+)
+
+data class ChangePasswordRequest(
+    @SerializedName("senha_atual") val senhaAtual: String,
+    @SerializedName("nova_senha") val novaSenha: String
+)
+
+data class UpdatePerfilRequest(
+    @SerializedName("nome") val nome: String? = null,
+    @SerializedName("avatar_url") val avatarUrl: String? = null
 )
 
 data class LoginRequest(

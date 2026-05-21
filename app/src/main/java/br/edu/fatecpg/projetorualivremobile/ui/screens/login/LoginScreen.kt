@@ -46,6 +46,7 @@ import br.edu.fatecpg.projetorualivremobile.ui.theme.IndigoPrimario
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
+    onNavigateToForgot: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -133,7 +134,18 @@ fun LoginScreen(
                     isPassword = true
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onNavigateToForgot) {
+                        Text(
+                            text = "Esqueci minha senha",
+                            color = IndigoPrimario,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
 
                 uiState.error?.let {
                     Text(

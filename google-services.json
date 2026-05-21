@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "610836443149",
+    "project_id": "rualivre-bd00e",
+    "storage_bucket": "rualivre-bd00e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:610836443149:android:9da3fa6cb6430d2483a544",
+        "android_client_info": {
+          "package_name": "br.edu.fatecpg.projetorualivremobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfPPGkF8lAw0xxYc6EVL8xOIDWZn-sQMU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
