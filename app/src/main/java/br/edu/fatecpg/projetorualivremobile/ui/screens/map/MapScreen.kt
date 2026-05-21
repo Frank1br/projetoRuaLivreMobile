@@ -25,10 +25,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Water
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,13 +42,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -86,6 +95,7 @@ fun MapScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    var triggerReporte by remember { mutableIntStateOf(0) }
 
     val mapView = remember(context) {
         MapView(context).apply {
@@ -262,16 +272,16 @@ fun MapScreen(
                 }
             }
 
-            // ── Legenda (canto inferior esquerdo) ─────────────────────────────
+            // ── Accordion: botão de reporte + legenda (canto inferior) ───────
             AnimatedVisibility(
-                visible = uiState.selectedCamera == null && uiState.selectedAlagamento == null,
+                visible = uiState.selectedCamera == null &&
+                    uiState.selectedAlagamento == null &&
+                    uiState.selectedReport == null,
                 enter = fadeIn(),
                 exit = fadeOut(),
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(12.dp)
+                modifier = Modifier.align(Alignment.BottomCenter)
             ) {
-                LegendCard()
+                MapControlAccordion(onReportClick = { triggerReporte++ })
             }
 
             // ── Painel câmera selecionada ─────────────────────────────────────
@@ -320,9 +330,10 @@ fun MapScreen(
                 }
             }
 
-            // ── Botão flutuante de reporte com foto ───────────────────────────
+            // ── Launcher de captura (sheet, sem UI flutuante) ─────────────────
             ReportCaptureFlow(
                 viewModel = viewModel,
+                triggerCount = triggerReporte,
                 onLocationError = { msg -> viewModel.notifyError(msg) },
                 modifier = Modifier.fillMaxSize()
             )
@@ -489,20 +500,101 @@ private fun AlagamentoInfoPanel(alagamento: Alagamento, onDismiss: () -> Unit) {
 // ─── Legenda ──────────────────────────────────────────────────────────────────
 
 @Composable
-private fun LegendCard() {
+private fun MapControlAccordion(
+    onReportClick: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
     Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 12.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.97f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            LegendItem(color = IndigoPrimario, label = "Câmera ativa")
-            LegendItem(color = AlertaMedioColor, label = "Manutenção")
-            LegendItem(color = Color(0xFF9E9EAF), label = "Inativa")
-            LegendItem(color = Color(0xFFE53935), label = "Crítico")
-            LegendItem(color = AlertaAltoColor, label = "Alto")
-            LegendItem(color = AlertaMedioColor, label = "Médio")
-            LegendItem(color = AlertaBaixoColor, label = "Baixo")
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+
+            // Cabeçalho: botão de reporte à esquerda, toggle de legenda à direita
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(
+                    onClick = onReportClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AlertaMedioColor,
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(10.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                        horizontal = 14.dp, vertical = 8.dp
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AddAPhoto,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(text = "Reportar", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
+
+                TextButton(onClick = { expanded = !expanded }) {
+                    Text(
+                        text = "Legenda",
+                        fontSize = 13.sp,
+                        color = IndigoPrimario,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = if (expanded) "Recolher" else "Expandir",
+                        tint = IndigoPrimario,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
+            AnimatedVisibility(visible = expanded) {
+                Column(
+                    modifier = Modifier.padding(top = 6.dp, bottom = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Câmeras",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF666680)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        LegendItem(color = IndigoPrimario, label = "Ativa")
+                        LegendItem(color = AlertaMedioColor, label = "Manutenção")
+                        LegendItem(color = Color(0xFF9E9EAF), label = "Inativa")
+                    }
+
+                    Text(
+                        text = "Alagamentos",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF666680),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        LegendItem(color = Color(0xFFE53935), label = "Crítico")
+                        LegendItem(color = AlertaAltoColor, label = "Alto")
+                        LegendItem(color = AlertaMedioColor, label = "Médio")
+                        LegendItem(color = AlertaBaixoColor, label = "Baixo")
+                    }
+                }
+            }
         }
     }
 }

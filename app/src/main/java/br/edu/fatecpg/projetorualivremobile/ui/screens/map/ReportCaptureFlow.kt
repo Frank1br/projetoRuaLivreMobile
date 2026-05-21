@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,14 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -47,7 +42,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaMedioColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.IndigoPrimario
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
@@ -56,6 +50,7 @@ import java.io.ByteArrayOutputStream
 @Composable
 fun ReportCaptureFlow(
     viewModel: MapViewModel,
+    triggerCount: Int,
     onLocationError: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -111,7 +106,9 @@ fun ReportCaptureFlow(
         }
     }
 
-    val onFabClick: () -> Unit = {
+    // Disparado pelo botão do MapControlAccordion via incremento do triggerCount.
+    LaunchedEffect(triggerCount) {
+        if (triggerCount <= 0) return@LaunchedEffect
         val camGranted = ContextCompat.checkSelfPermission(
             context, Manifest.permission.CAMERA
         ) == PackageManager.PERMISSION_GRANTED
@@ -137,22 +134,6 @@ fun ReportCaptureFlow(
             capturedLocation = null
             descricao = ""
             viewModel.clearReportFeedback()
-        }
-    }
-
-    Box(modifier = modifier) {
-        FloatingActionButton(
-            onClick = onFabClick,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 96.dp),
-            containerColor = AlertaMedioColor,
-            contentColor = Color.White
-        ) {
-            Icon(
-                imageVector = Icons.Default.AddAPhoto,
-                contentDescription = "Reportar alagamento"
-            )
         }
     }
 
