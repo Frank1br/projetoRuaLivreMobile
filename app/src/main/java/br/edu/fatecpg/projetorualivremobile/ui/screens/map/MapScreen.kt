@@ -101,8 +101,9 @@ fun MapScreen(
         MapView(context).apply {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
-            controller.setZoom(14.0)
-            controller.setCenter(GeoPoint(-23.5505, -46.6333))
+            controller.setZoom(13.5)
+            // Centro de Praia Grande — SP (orla central, próximo a Boqueirão).
+            controller.setCenter(GeoPoint(-24.0055, -46.4022))
         }
     }
 
