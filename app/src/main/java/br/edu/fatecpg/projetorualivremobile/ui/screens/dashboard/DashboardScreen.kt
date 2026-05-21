@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.edu.fatecpg.projetorualivremobile.data.model.NivelAlagamento
 import br.edu.fatecpg.projetorualivremobile.ui.components.BottomBar
+import br.edu.fatecpg.projetorualivremobile.util.DateFormatter
 import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaAltoColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaBaixoColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.IndigoPrimario
@@ -211,7 +212,7 @@ fun DashboardScreen(
                                     color = Color(0xFF9999AA)
                                 )
                             } else {
-                                val labels = historico.map { it.data.takeLast(5) }
+                                val labels = historico.map { DateFormatter.formatShortDate(it.data) }
                                 BarChart(
                                     values = historico.map { it.totalOcorrencias.toFloat() },
                                     modifier = Modifier

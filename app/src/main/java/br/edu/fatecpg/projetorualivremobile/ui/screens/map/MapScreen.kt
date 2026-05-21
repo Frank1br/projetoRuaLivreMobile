@@ -76,6 +76,7 @@ import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaAltoColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaBaixoColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaMedioColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.IndigoPrimario
+import br.edu.fatecpg.projetorualivremobile.util.DateFormatter
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -489,7 +490,7 @@ private fun AlagamentoInfoPanel(alagamento: Alagamento, onDismiss: () -> Unit) {
 
             if (alagamento.dataRegistro.isNotBlank()) {
                 Text(
-                    text = "Registrado: ${alagamento.dataRegistro.take(16)}",
+                    text = "Registrado ${DateFormatter.formatRelative(alagamento.dataRegistro)}",
                     fontSize = 12.sp,
                     color = Color(0xFF888899)
                 )
@@ -753,9 +754,16 @@ private fun ReportInfoPanel(
                 Spacer(Modifier.height(4.dp))
             }
 
+            if (report.criadoEm.isNotBlank()) {
+                Text(
+                    text = "Reportado ${DateFormatter.formatRelative(report.criadoEm)}",
+                    fontSize = 12.sp,
+                    color = Color(0xFF888899)
+                )
+            }
             if (report.expiraEm.isNotBlank()) {
                 Text(
-                    text = "Expira em ${report.expiraEm.take(16)}",
+                    text = "Expira ${DateFormatter.formatTimeUntil(report.expiraEm)}",
                     fontSize = 12.sp,
                     color = Color(0xFF888899)
                 )

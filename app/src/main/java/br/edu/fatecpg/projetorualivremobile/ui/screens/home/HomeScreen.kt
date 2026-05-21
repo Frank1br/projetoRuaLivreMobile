@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.edu.fatecpg.projetorualivremobile.data.model.Alerta
 import br.edu.fatecpg.projetorualivremobile.ui.components.BottomBar
+import br.edu.fatecpg.projetorualivremobile.util.DateFormatter
 import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaBaixoColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.AlertaMedioColor
 import br.edu.fatecpg.projetorualivremobile.ui.theme.IndigoPrimario
@@ -337,7 +338,7 @@ fun HomeScreen(
                 alerta.dataEnvio?.let { data ->
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Recebido em ${data.take(16)}",
+                        text = "Recebido ${DateFormatter.formatRelative(data)}",
                         fontSize = 12.sp,
                         color = TextGray
                     )
@@ -483,7 +484,7 @@ private fun AlertaItem(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 alerta.dataEnvio?.let { data ->
                     Text(
-                        text = data.take(16),
+                        text = DateFormatter.formatRelative(data),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         color = TextGray
