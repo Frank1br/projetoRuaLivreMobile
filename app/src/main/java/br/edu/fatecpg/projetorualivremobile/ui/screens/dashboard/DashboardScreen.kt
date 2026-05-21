@@ -4,8 +4,10 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -105,26 +107,29 @@ fun DashboardScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Stats row
+                // Stats row — IntrinsicSize.Min faz o Row pegar a altura
+                // do card mais alto, e fillMaxHeight() em cada um equaliza.
                 item {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         StatCard(
                             value = "${uiState.alagamentosAtivos}",
                             label = "Alagamentos ativos",
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f).fillMaxHeight()
                         )
                         StatCard(
                             value = "${uiState.camerasAtivas}",
                             label = "Câmeras ativas",
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f).fillMaxHeight()
                         )
                         StatCard(
                             value = "${uiState.alertasHoje}",
                             label = "Alertas hoje",
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f).fillMaxHeight()
                         )
                     }
                 }
