@@ -22,12 +22,25 @@ import br.edu.fatecpg.projetorualivremobile.data.model.RegisterRequest
 import br.edu.fatecpg.projetorualivremobile.data.model.StatusCameraRequest
 import br.edu.fatecpg.projetorualivremobile.data.model.Usuario
 import br.edu.fatecpg.projetorualivremobile.data.remote.RuaLivreApi
+import com.google.gson.JsonParser
 import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
+
+// Extrai a mensagem amigável do corpo de erro da API ({"detail": "..."}).
+private fun mensagemDeErro(response: Response<*>): String {
+    val raw = runCatching { response.errorBody()?.string() }.getOrNull()
+    val detail = raw?.let {
+        runCatching {
+            JsonParser.parseString(it).asJsonObject.get("detail").asString
+        }.getOrNull()
+    }
+    return detail ?: "Erro ${response.code()}"
+}
 
 // Token JWT persistido em EncryptedSharedPreferences. Sobrevive a restarts do app.
 @Singleton
@@ -99,7 +112,8 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun trocarSenha(senhaAtual: String, novaSenha: String): Result<Unit> = runCatching {
-        api.trocarSenha(ChangePasswordRequest(senhaAtual, novaSenha))
+        val resp = api.trocarSenha(ChangePasswordRequest(senhaAtual, novaSenha))
+        if (!resp.isSuccessful) throw Exception(mensagemDeErro(resp))
     }
 
     suspend fun esqueciSenha(email: String): Result<Unit> = runCatching {
@@ -107,7 +121,8 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun resetarSenha(email: String, codigo: String, novaSenha: String): Result<Unit> = runCatching {
-        api.resetarSenha(ResetPasswordRequest(email.trim().lowercase(), codigo.trim(), novaSenha))
+        val resp = api.resetarSenha(ResetPasswordRequest(email.trim().lowercase(), codigo.trim(), novaSenha))
+        if (!resp.isSuccessful) throw Exception(mensagemDeErro(resp))
     }
 
     suspend fun getAvataresPadrao(): Result<List<AvatarPadrao>> = runCatching {
@@ -200,7 +215,10 @@ class ReportRepository @Inject constructor(private val api: RuaLivreApi) {
         api.criarReport(latPart, lonPart, descPart, fotoPart)
     }
 
-    suspend fun remover(id: Int): Result<Unit> = runCatching { api.removerReport(id) }
+    suspend fun remover(id: Int): Result<Unit> = runCatching {
+        val resp = api.removerReport(id)
+        if (!resp.isSuccessful) throw Exception(mensagemDeErro(resp))
+    }
 }
 
 // ─── Câmeras ──────────────────────────────────────────────────────────────────

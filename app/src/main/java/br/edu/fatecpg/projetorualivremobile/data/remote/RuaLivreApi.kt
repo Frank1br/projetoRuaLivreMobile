@@ -28,6 +28,7 @@ import br.edu.fatecpg.projetorualivremobile.util.PasswordValidator
 import kotlinx.coroutines.delay
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -56,14 +57,16 @@ interface RuaLivreApi {
     @PATCH("auth/me")
     suspend fun atualizarPerfil(@Body request: UpdatePerfilRequest): Usuario
 
+    // 204 No Content — corpo vazio; Response<Unit> evita o erro
+    // "response body was null but declared non-null".
     @POST("auth/me/change-password")
-    suspend fun trocarSenha(@Body request: ChangePasswordRequest)
+    suspend fun trocarSenha(@Body request: ChangePasswordRequest): Response<Unit>
 
     @POST("auth/forgot-password")
     suspend fun esqueciSenha(@Body request: ForgotPasswordRequest)
 
     @POST("auth/reset-password")
-    suspend fun resetarSenha(@Body request: ResetPasswordRequest)
+    suspend fun resetarSenha(@Body request: ResetPasswordRequest): Response<Unit>
 
     @GET("avatars/padroes")
     suspend fun getAvataresPadrao(): List<AvatarPadrao>
@@ -145,7 +148,7 @@ interface RuaLivreApi {
     suspend fun getReports(): List<AlagamentoReportado>
 
     @DELETE("reports/alagamentos/{id}")
-    suspend fun removerReport(@Path("id") id: Int)
+    suspend fun removerReport(@Path("id") id: Int): Response<Unit>
 }
 
 // ─── FakeApiService ───────────────────────────────────────────────────────────
@@ -318,7 +321,10 @@ class FakeApiService : RuaLivreApi {
         return emptyList()
     }
 
-    override suspend fun removerReport(id: Int) { delay(200) }
+    override suspend fun removerReport(id: Int): Response<Unit> {
+        delay(200)
+        return Response.success(Unit)
+    }
 
     // ── Perfil / Auth extras (stubs) ──────────────────────────────────────────
 
@@ -330,9 +336,17 @@ class FakeApiService : RuaLivreApi {
         )
     }
 
-    override suspend fun trocarSenha(request: ChangePasswordRequest) { delay(200) }
+    override suspend fun trocarSenha(request: ChangePasswordRequest): Response<Unit> {
+        delay(200)
+        return Response.success(Unit)
+    }
+
     override suspend fun esqueciSenha(request: ForgotPasswordRequest) { delay(200) }
-    override suspend fun resetarSenha(request: ResetPasswordRequest) { delay(200) }
+
+    override suspend fun resetarSenha(request: ResetPasswordRequest): Response<Unit> {
+        delay(200)
+        return Response.success(Unit)
+    }
 
     override suspend fun getAvataresPadrao(): List<AvatarPadrao> {
         delay(150)
