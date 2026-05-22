@@ -1,7 +1,11 @@
 package br.edu.fatecpg.projetorualivremobile.ui.screens.editprofile
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,6 +26,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +45,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -124,15 +131,40 @@ class EditProfileViewModel @Inject constructor(
     fun uploadAvatar(bitmap: Bitmap) {
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, error = null) }
+            val preparada = prepararAvatar(bitmap)
             val baos = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, baos)
+            preparada.compress(Bitmap.CompressFormat.JPEG, 85, baos)
             authRepository.uploadAvatar(baos.toByteArray()).fold(
                 onSuccess = { user -> _uiState.update { it.copy(isSaving = false, avatarUrl = user.avatarUrl) } },
                 onFailure = { e -> _uiState.update { it.copy(isSaving = false, error = ErrorMessages.from(e)) } }
             )
         }
     }
+
+    /** Recorta a foto num quadrado central e reduz para 512px — garante
+     *  que o avatar preencha o círculo sem distorção e mantém o upload leve. */
+    private fun prepararAvatar(src: Bitmap): Bitmap {
+        val lado = minOf(src.width, src.height)
+        val x = (src.width - lado) / 2
+        val y = (src.height - lado) / 2
+        val quadrada = Bitmap.createBitmap(src, x, y, lado, lado)
+        val alvo = 512
+        return if (lado > alvo) {
+            Bitmap.createScaledBitmap(quadrada, alvo, alvo, true)
+        } else {
+            quadrada
+        }
+    }
 }
+
+// Decodifica uma Uri da galeria em Bitmap. Funciona em todas as versões
+// do Android (não usa ImageDecoder, que é API 28+).
+private fun decodeUriToBitmap(context: Context, uri: Uri): Bitmap? =
+    runCatching {
+        context.contentResolver.openInputStream(uri)?.use { stream ->
+            BitmapFactory.decodeStream(stream)
+        }
+    }.getOrNull()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -142,12 +174,22 @@ fun EditProfileScreen(
     viewModel: EditProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(state.success) { if (state.success) onDone() }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bmp -> bmp?.let(viewModel::uploadAvatar) }
+
+    // Photo Picker do sistema — não exige permissão de armazenamento.
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            decodeUriToBitmap(context, uri)?.let(viewModel::uploadAvatar)
+        }
+    }
 
     Scaffold(
         containerColor = Color(0xFFF3F4F8),
@@ -224,6 +266,7 @@ fun EditProfileScreen(
                         AsyncImage(
                             model = av.url,
                             contentDescription = av.nome,
+                            contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
                     }
@@ -232,13 +275,37 @@ fun EditProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedButton(
-                onClick = { cameraLauncher.launch(null) },
-                modifier = Modifier.fillMaxWidth()
+            Text(
+                text = "Ou use uma foto sua",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF1A1A2E)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.size(8.dp))
-                Text("Tirar foto e usar como avatar")
+                OutlinedButton(
+                    onClick = { cameraLauncher.launch(null) },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.size(6.dp))
+                    Text("Câmera")
+                }
+                OutlinedButton(
+                    onClick = {
+                        galleryLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.PhotoLibrary, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.size(6.dp))
+                    Text("Galeria")
+                }
             }
 
             state.error?.let {
@@ -268,6 +335,7 @@ private fun AvatarBubble(url: String?, size: androidx.compose.ui.unit.Dp) {
             AsyncImage(
                 model = url,
                 contentDescription = "Avatar",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize().clip(CircleShape)
             )
         } else {

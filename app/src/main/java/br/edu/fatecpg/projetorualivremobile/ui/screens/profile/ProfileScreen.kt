@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -172,6 +173,7 @@ private fun AvatarHeader(url: String?) {
             AsyncImage(
                 model = url,
                 contentDescription = "Avatar",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier.size(80.dp).clip(CircleShape)
             )
         } else {
