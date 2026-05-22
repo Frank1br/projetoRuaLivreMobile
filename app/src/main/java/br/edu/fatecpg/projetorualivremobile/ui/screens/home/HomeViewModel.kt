@@ -7,6 +7,7 @@ import br.edu.fatecpg.projetorualivremobile.data.model.NivelAlagamento
 import br.edu.fatecpg.projetorualivremobile.data.repository.AlagamentoRepository
 import br.edu.fatecpg.projetorualivremobile.data.repository.AuthRepository
 import br.edu.fatecpg.projetorualivremobile.data.repository.DashboardRepository
+import br.edu.fatecpg.projetorualivremobile.util.ErrorMessages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,8 +89,8 @@ class HomeViewModel @Inject constructor(
                     nMedio = nMedio,
                     nBaixo = nBaixo,
                     alertas = alertasResult.getOrElse { emptyList() },
-                    error = alagamentosResult.exceptionOrNull()?.message
-                        ?: statsResult.exceptionOrNull()?.message
+                    error = (alagamentosResult.exceptionOrNull() ?: statsResult.exceptionOrNull())
+                        ?.let { e -> ErrorMessages.from(e) }
                 )
             }
         }

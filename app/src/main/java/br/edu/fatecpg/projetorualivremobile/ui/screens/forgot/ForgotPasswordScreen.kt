@@ -34,6 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import br.edu.fatecpg.projetorualivremobile.ui.components.PasswordRequirementsChecklist
 import br.edu.fatecpg.projetorualivremobile.ui.components.RuaLivreButton
 import br.edu.fatecpg.projetorualivremobile.ui.components.RuaLivreTextField
 import br.edu.fatecpg.projetorualivremobile.ui.theme.IndigoPrimario
@@ -152,12 +153,18 @@ fun ForgotPasswordScreen(
                             label = "Nova senha",
                             isPassword = true
                         )
+                        if (state.novaSenha.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            PasswordRequirementsChecklist(requirements = state.passwordRequirements)
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
                         RuaLivreTextField(
                             value = state.confirmSenha,
                             onValueChange = viewModel::onConfirmSenhaChange,
                             label = "Confirmar nova senha",
-                            isPassword = true
+                            isPassword = true,
+                            isError = state.confirmSenhaError != null,
+                            errorMessage = state.confirmSenhaError
                         )
                         state.error?.let {
                             Spacer(modifier = Modifier.height(8.dp))

@@ -7,6 +7,7 @@ import br.edu.fatecpg.projetorualivremobile.data.model.NivelAlagamento
 import br.edu.fatecpg.projetorualivremobile.data.model.RegiaoCount
 import br.edu.fatecpg.projetorualivremobile.data.repository.AlagamentoRepository
 import br.edu.fatecpg.projetorualivremobile.data.repository.DashboardRepository
+import br.edu.fatecpg.projetorualivremobile.util.ErrorMessages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,8 +63,8 @@ class DashboardViewModel @Inject constructor(
                     porNivel = porNivel,
                     porRegiao = stats?.alagamentosPorRegiao ?: emptyList(),
                     historico = historicoResult.getOrElse { emptyList() },
-                    error = statsResult.exceptionOrNull()?.message
-                        ?: alagamentosResult.exceptionOrNull()?.message
+                    error = (statsResult.exceptionOrNull() ?: alagamentosResult.exceptionOrNull())
+                        ?.let { e -> ErrorMessages.from(e) }
                 )
             }
         }

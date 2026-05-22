@@ -199,6 +199,10 @@ class ReportRepository @Inject constructor(private val api: RuaLivreApi) {
         api.getReports()
     }
 
+    suspend fun listarMeus(): Result<List<AlagamentoReportado>> = runCatching {
+        api.getMeusReports()
+    }
+
     suspend fun criar(
         latitude: Double,
         longitude: Double,

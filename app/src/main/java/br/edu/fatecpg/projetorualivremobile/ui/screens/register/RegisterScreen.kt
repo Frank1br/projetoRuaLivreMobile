@@ -16,8 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,10 +37,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import br.edu.fatecpg.projetorualivremobile.ui.components.PasswordRequirementsChecklist
 import br.edu.fatecpg.projetorualivremobile.ui.components.RuaLivreButton
 import br.edu.fatecpg.projetorualivremobile.ui.components.RuaLivreTextField
 import br.edu.fatecpg.projetorualivremobile.ui.theme.IndigoPrimario
-import br.edu.fatecpg.projetorualivremobile.util.PasswordValidator
 
 @Composable
 fun RegisterScreen(
@@ -204,48 +202,3 @@ fun RegisterScreen(
     }
 }
 
-@Composable
-private fun PasswordRequirementsChecklist(
-    requirements: PasswordValidator.PasswordRequirements
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 4.dp)
-    ) {
-        Text(
-            text = "Requisitos da senha:",
-            style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFF666680),
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        RequirementItem("Mínimo 8 caracteres", requirements.hasMinLength)
-        RequirementItem("Pelo menos uma letra maiúscula (A-Z)", requirements.hasUppercase)
-        RequirementItem("Pelo menos uma letra minúscula (a-z)", requirements.hasLowercase)
-        RequirementItem("Pelo menos um número (0-9)", requirements.hasDigit)
-        RequirementItem("Pelo menos um caractere especial (!@#\$...)", requirements.hasSpecialChar)
-        RequirementItem("Sem espaços no início ou no fim", requirements.noLeadingTrailingSpaces)
-    }
-}
-
-@Composable
-private fun RequirementItem(label: String, isMet: Boolean) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(vertical = 2.dp)
-    ) {
-        Icon(
-            imageVector = if (isMet) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-            contentDescription = null,
-            tint = if (isMet) Color(0xFF4CAF50) else Color(0xFFAAAAAA),
-            modifier = Modifier.size(14.dp)
-        )
-        Spacer(modifier = Modifier.size(6.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = if (isMet) Color(0xFF4CAF50) else Color(0xFF888888)
-        )
-    }
-}

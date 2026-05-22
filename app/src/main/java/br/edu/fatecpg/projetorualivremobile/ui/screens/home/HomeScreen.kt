@@ -296,14 +296,26 @@ fun HomeScreen(
                     )
                 }
 
-                items(uiState.alertas) { alerta ->
-                    AlertaItem(
-                        alerta = alerta,
-                        onClick = { selectedAlerta = alerta },
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp)
-                            .padding(bottom = 8.dp)
-                    )
+                if (uiState.alertas.isEmpty()) {
+                    item {
+                        Text(
+                            text = "Nenhum alerta recente.",
+                            fontSize = 13.sp,
+                            color = TextGray,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                        )
+                    }
+                } else {
+                    items(uiState.alertas, key = { it.id }) { alerta ->
+                        AlertaItem(
+                            alerta = alerta,
+                            onClick = { selectedAlerta = alerta },
+                            modifier = Modifier
+                                .animateItem()
+                                .padding(horizontal = 20.dp)
+                                .padding(bottom = 8.dp)
+                        )
+                    }
                 }
 
                 item { Spacer(modifier = Modifier.height(8.dp)) }

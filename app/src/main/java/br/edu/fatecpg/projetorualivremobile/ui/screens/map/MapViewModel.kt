@@ -11,6 +11,7 @@ import br.edu.fatecpg.projetorualivremobile.data.repository.AlagamentoRepository
 import br.edu.fatecpg.projetorualivremobile.data.repository.CameraRepository
 import br.edu.fatecpg.projetorualivremobile.data.repository.ReportRepository
 import br.edu.fatecpg.projetorualivremobile.util.AuthEventBus
+import br.edu.fatecpg.projetorualivremobile.util.ErrorMessages
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -79,8 +80,8 @@ class MapViewModel @Inject constructor(
                     alagamentos = alagamentosResult.getOrElse { emptyList() },
                     cameras = camerasResult.getOrElse { emptyList() },
                     reports = reportsResult.getOrElse { emptyList() },
-                    error = alagamentosResult.exceptionOrNull()?.message
-                        ?: camerasResult.exceptionOrNull()?.message
+                    error = (alagamentosResult.exceptionOrNull() ?: camerasResult.exceptionOrNull())
+                        ?.let { e -> ErrorMessages.from(e) }
                 )
             }
         }
@@ -132,7 +133,7 @@ class MapViewModel @Inject constructor(
                     _uiState.update { s ->
                         s.copy(
                             isSubmittingReport = false,
-                            reportError = e.message ?: "Falha ao enviar o reporte"
+                            reportError = ErrorMessages.from(e)
                         )
                     }
                 }

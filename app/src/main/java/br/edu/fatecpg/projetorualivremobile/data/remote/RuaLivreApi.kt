@@ -147,6 +147,9 @@ interface RuaLivreApi {
     @GET("reports/alagamentos")
     suspend fun getReports(): List<AlagamentoReportado>
 
+    @GET("reports/alagamentos/meus")
+    suspend fun getMeusReports(): List<AlagamentoReportado>
+
     @DELETE("reports/alagamentos/{id}")
     suspend fun removerReport(@Path("id") id: Int): Response<Unit>
 }
@@ -317,6 +320,11 @@ class FakeApiService : RuaLivreApi {
     }
 
     override suspend fun getReports(): List<AlagamentoReportado> {
+        delay(300)
+        return emptyList()
+    }
+
+    override suspend fun getMeusReports(): List<AlagamentoReportado> {
         delay(300)
         return emptyList()
     }

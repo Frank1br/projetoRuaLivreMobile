@@ -51,6 +51,7 @@ import br.edu.fatecpg.projetorualivremobile.data.repository.AuthRepository
 import br.edu.fatecpg.projetorualivremobile.ui.components.RuaLivreButton
 import br.edu.fatecpg.projetorualivremobile.ui.components.RuaLivreTextField
 import br.edu.fatecpg.projetorualivremobile.ui.theme.IndigoPrimario
+import br.edu.fatecpg.projetorualivremobile.util.ErrorMessages
 import coil3.compose.AsyncImage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -115,7 +116,7 @@ class EditProfileViewModel @Inject constructor(
             _uiState.update { it.copy(isSaving = true, error = null) }
             authRepository.atualizarPerfil(nome = s.nome.trim(), avatarUrl = s.avatarUrl).fold(
                 onSuccess = { _uiState.update { it.copy(isSaving = false, success = true) } },
-                onFailure = { e -> _uiState.update { it.copy(isSaving = false, error = e.message ?: "Falha ao salvar") } }
+                onFailure = { e -> _uiState.update { it.copy(isSaving = false, error = ErrorMessages.from(e)) } }
             )
         }
     }
@@ -127,7 +128,7 @@ class EditProfileViewModel @Inject constructor(
             bitmap.compress(Bitmap.CompressFormat.JPEG, 85, baos)
             authRepository.uploadAvatar(baos.toByteArray()).fold(
                 onSuccess = { user -> _uiState.update { it.copy(isSaving = false, avatarUrl = user.avatarUrl) } },
-                onFailure = { e -> _uiState.update { it.copy(isSaving = false, error = e.message ?: "Falha no upload") } }
+                onFailure = { e -> _uiState.update { it.copy(isSaving = false, error = ErrorMessages.from(e)) } }
             )
         }
     }

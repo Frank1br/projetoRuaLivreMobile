@@ -19,7 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -49,7 +49,7 @@ fun ProfileScreen(
     onNavigateToMap: () -> Unit,
     onNavigateToDashboard: () -> Unit,
     onNavigateToEditProfile: () -> Unit,
-    onNavigateToChangePassword: () -> Unit,
+    onNavigateToMyReports: () -> Unit,
     onLogout: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
@@ -118,9 +118,9 @@ fun ProfileScreen(
                     HorizontalDivider(color = Color(0xFFF0F0F5), thickness = 1.dp, modifier = Modifier.padding(start = 56.dp))
 
                     ProfileMenuItem(
-                        icon = Icons.Default.Lock,
-                        label = "Trocar senha",
-                        onClick = onNavigateToChangePassword
+                        icon = Icons.Default.PhotoLibrary,
+                        label = "Meus reportes",
+                        onClick = onNavigateToMyReports
                     )
                     HorizontalDivider(color = Color(0xFFF0F0F5), thickness = 1.dp)
 

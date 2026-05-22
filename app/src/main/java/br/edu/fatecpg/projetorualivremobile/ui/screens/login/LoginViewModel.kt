@@ -3,6 +3,7 @@ package br.edu.fatecpg.projetorualivremobile.ui.screens.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.edu.fatecpg.projetorualivremobile.data.repository.AuthRepository
+import br.edu.fatecpg.projetorualivremobile.util.ErrorMessages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +40,7 @@ class LoginViewModel @Inject constructor(
             )
             result.fold(
                 onSuccess = { _uiState.update { it.copy(isLoading = false, isLoginSuccess = true) } },
-                onFailure = { e -> _uiState.update { it.copy(isLoading = false, error = e.message ?: "Erro ao fazer login") } }
+                onFailure = { e -> _uiState.update { it.copy(isLoading = false, error = ErrorMessages.from(e)) } }
             )
         }
     }

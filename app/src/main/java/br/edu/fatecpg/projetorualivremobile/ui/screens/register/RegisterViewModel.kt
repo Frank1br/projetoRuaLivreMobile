@@ -3,6 +3,7 @@ package br.edu.fatecpg.projetorualivremobile.ui.screens.register
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.edu.fatecpg.projetorualivremobile.data.repository.AuthRepository
+import br.edu.fatecpg.projetorualivremobile.util.ErrorMessages
 import br.edu.fatecpg.projetorualivremobile.util.PasswordValidator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -87,7 +88,7 @@ class RegisterViewModel @Inject constructor(
             val result = authRepository.register(state.usuario, state.email, state.senha)
             result.fold(
                 onSuccess = { _uiState.update { it.copy(isLoading = false, isRegisterSuccess = true) } },
-                onFailure = { e -> _uiState.update { it.copy(isLoading = false, error = e.message ?: "Erro ao cadastrar") } }
+                onFailure = { e -> _uiState.update { it.copy(isLoading = false, error = ErrorMessages.from(e)) } }
             )
         }
     }
