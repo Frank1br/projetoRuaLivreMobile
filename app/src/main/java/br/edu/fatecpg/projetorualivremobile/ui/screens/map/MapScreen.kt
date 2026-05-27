@@ -326,6 +326,7 @@ fun MapScreen(
                 uiState.selectedReport?.let { report ->
                     ReportInfoPanel(
                         report = report,
+                        isOwner = uiState.currentUserId != null && uiState.currentUserId == report.usuarioId,
                         onDismiss = viewModel::clearSelection,
                         onRemover = { viewModel.removerReport(report.id) }
                     )
@@ -709,6 +710,7 @@ private fun buildReportDrawable(context: Context): BitmapDrawable {
 @Composable
 private fun ReportInfoPanel(
     report: AlagamentoReportado,
+    isOwner: Boolean,
     onDismiss: () -> Unit,
     onRemover: () -> Unit
 ) {
@@ -783,13 +785,14 @@ private fun ReportInfoPanel(
                 )
             }
 
-            Spacer(Modifier.height(8.dp))
-
-            androidx.compose.material3.TextButton(
-                onClick = onRemover,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Remover este reporte", color = Color(0xFFD32F2F))
+            if (isOwner) {
+                Spacer(Modifier.height(8.dp))
+                androidx.compose.material3.TextButton(
+                    onClick = onRemover,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Remover este reporte", color = Color(0xFFD32F2F))
+                }
             }
         }
     }

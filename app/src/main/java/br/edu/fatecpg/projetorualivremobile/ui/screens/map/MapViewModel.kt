@@ -8,6 +8,7 @@ import br.edu.fatecpg.projetorualivremobile.data.model.Alagamento
 import br.edu.fatecpg.projetorualivremobile.data.model.AlagamentoReportado
 import br.edu.fatecpg.projetorualivremobile.data.model.Camera
 import br.edu.fatecpg.projetorualivremobile.data.repository.AlagamentoRepository
+import br.edu.fatecpg.projetorualivremobile.data.repository.AuthRepository
 import br.edu.fatecpg.projetorualivremobile.data.repository.CameraRepository
 import br.edu.fatecpg.projetorualivremobile.data.repository.ReportRepository
 import br.edu.fatecpg.projetorualivremobile.util.AuthEventBus
@@ -38,7 +39,8 @@ data class MapUiState(
     val isSubmittingReport: Boolean = false,
     val reportError: String? = null,
     val reportSuccess: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val currentUserId: Int? = null
 )
 
 @HiltViewModel
@@ -46,6 +48,7 @@ class MapViewModel @Inject constructor(
     private val alagamentoRepository: AlagamentoRepository,
     private val cameraRepository: CameraRepository,
     private val reportRepository: ReportRepository,
+    private val authRepository: AuthRepository,
     private val authEventBus: AuthEventBus,
     @ApplicationContext private val appContext: Context
 ) : ViewModel() {
@@ -53,7 +56,7 @@ class MapViewModel @Inject constructor(
     /** Empurra uma mensagem para o snackbar global (via AuthEventBus). */
     fun notifyError(message: String) = authEventBus.notifyError(message)
 
-    private val _uiState = MutableStateFlow(MapUiState())
+    private val _uiState = MutableStateFlow(MapUiState(currentUserId = authRepository.currentUsuario?.id))
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
 
     private val locationClient = LocationServices.getFusedLocationProviderClient(appContext)
