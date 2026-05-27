@@ -52,12 +52,21 @@ fun ProfileScreen(
     onNavigateToEditProfile: () -> Unit,
     onNavigateToMyReports: () -> Unit,
     onLogout: () -> Unit,
+    reloadTrigger: Boolean = false,
+    onReloadHandled: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState.isLoggedOut) {
         if (uiState.isLoggedOut) onLogout()
+    }
+
+    LaunchedEffect(reloadTrigger) {
+        if (reloadTrigger) {
+            viewModel.reload()
+            onReloadHandled()
+        }
     }
 
     Scaffold(

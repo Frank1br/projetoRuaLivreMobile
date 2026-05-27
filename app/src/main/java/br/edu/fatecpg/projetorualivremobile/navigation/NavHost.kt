@@ -11,6 +11,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -158,7 +160,10 @@ fun AppNavHost(
                 )
             }
 
-            composable(Route.Profile.path) {
+            composable(Route.Profile.path) { backStackEntry ->
+                val reloadProfile by backStackEntry.savedStateHandle
+                    .getStateFlow("reload_profile", false)
+                    .collectAsState()
                 ProfileScreen(
                     onNavigateToHome = { navController.navigate(Route.Home.path) },
                     onNavigateToMap = { navController.navigate(Route.Map.path) },
@@ -169,13 +174,20 @@ fun AppNavHost(
                         navController.navigate(Route.Login.path) {
                             popUpTo(0) { inclusive = true }
                         }
-                    }
+                    },
+                    reloadTrigger = reloadProfile,
+                    onReloadHandled = { backStackEntry.savedStateHandle["reload_profile"] = false }
                 )
             }
 
             composable(Route.EditProfile.path) {
                 EditProfileScreen(
-                    onDone = { navController.popBackStack() },
+                    onDone = {
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("reload_profile", true)
+                        navController.popBackStack()
+                    },
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

@@ -359,9 +359,11 @@ class FakeApiService : RuaLivreApi {
     override suspend fun getAvataresPadrao(): List<AvatarPadrao> {
         delay(150)
         return listOf(
-            AvatarPadrao("azul", "Indigo", "https://example.com/azul.svg"),
-            AvatarPadrao("laranja", "Laranja", "https://example.com/laranja.svg"),
-            AvatarPadrao("verde", "Verde", "https://example.com/verde.svg")
+            AvatarPadrao("Avatar1", "Avatar 1", "https://example.com/Avatar1.jpeg"),
+            AvatarPadrao("Avatar2", "Avatar 2", "https://example.com/Avatar2.jpeg"),
+            AvatarPadrao("Avatar3", "Avatar 3", "https://example.com/Avatar3.jpeg"),
+            AvatarPadrao("Avatar4", "Avatar 4", "https://example.com/Avatar4.jpeg"),
+            AvatarPadrao("Avatar5", "Avatar 5", "https://example.com/Avatar5.jpeg")
         )
     }
 

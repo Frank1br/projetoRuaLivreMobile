@@ -23,6 +23,10 @@ class ProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProfileUiState(usuario = authRepository.currentUsuario))
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
+    fun reload() {
+        _uiState.update { it.copy(usuario = authRepository.currentUsuario) }
+    }
+
     fun logout() {
         authRepository.logout()
         _uiState.update { it.copy(isLoggedOut = true) }

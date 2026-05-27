@@ -16,6 +16,11 @@ val apiBaseUrl: String = Properties().apply {
     if (f.exists()) f.inputStream().use { load(it) }
 }.getProperty("api.base_url", "http://192.168.2.73:8000/")
 
+// Credenciais de assinatura release lidas de keystore.properties (fora do git).
+val keystoreProps: Properties? = rootProject.file("keystore.properties").let { f ->
+    if (f.exists()) Properties().apply { f.inputStream().use { load(it) } } else null
+}
+
 android {
     namespace = "br.edu.fatecpg.projetorualivremobile"
     compileSdk = 36
@@ -32,6 +37,17 @@ android {
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
 
+    signingConfigs {
+        keystoreProps?.let { props ->
+            create("release") {
+                storeFile = rootProject.file(props.getProperty("storeFile"))
+                storePassword = props.getProperty("storePassword")
+                keyAlias = props.getProperty("keyAlias")
+                keyPassword = props.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -39,6 +55,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
     compileOptions {
