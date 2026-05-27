@@ -653,24 +653,66 @@ private fun buildCircleDrawable(context: Context, color: Int, sizeDp: Int): Bitm
 
 private fun buildCameraDrawable(context: Context, color: Int): BitmapDrawable {
     val density = context.resources.displayMetrics.density
-    val px = (28 * density).toInt()
+    val px = (32 * density).toInt()
     val bitmap = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888)
     val canvas = android.graphics.Canvas(bitmap)
 
+    // Sombra suave
+    val shadow = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        this.color = android.graphics.Color.argb(60, 0, 0, 0)
+    }
+    canvas.drawCircle(px / 2f, px / 2f + density, px / 2f - density, shadow)
+
+    // Círculo de fundo na cor do status
     val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color }
-    canvas.drawRoundRect(
-        android.graphics.RectF(0f, 0f, px.toFloat(), px.toFloat()),
-        6 * density, 6 * density, fill
-    )
+    canvas.drawCircle(px / 2f, px / 2f, px / 2f - density, fill)
+
+    // Borda branca
     val border = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         this.color = android.graphics.Color.WHITE
         style = Paint.Style.STROKE
         strokeWidth = 2.5f * density
     }
-    canvas.drawRoundRect(
-        android.graphics.RectF(density, density, px - density, px - density),
-        5 * density, 5 * density, border
+    canvas.drawCircle(px / 2f, px / 2f, px / 2f - density - 1, border)
+
+    // Ícone de câmera (branco) centralizado
+    val white = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        this.color = android.graphics.Color.WHITE
+        style = Paint.Style.FILL
+    }
+    val cx = px / 2f
+    val cy = px / 2f
+
+    // Corpo da câmera (retângulo arredondado)
+    val bodyW = 16f * density
+    val bodyH = 11f * density
+    val bodyLeft = cx - bodyW / 2f
+    val bodyTop = cy - bodyH / 2f + 1f * density
+    val bodyRect = android.graphics.RectF(
+        bodyLeft, bodyTop, bodyLeft + bodyW, bodyTop + bodyH
     )
+    canvas.drawRoundRect(bodyRect, 2f * density, 2f * density, white)
+
+    // Topo da câmera (saliência do visor)
+    val topW = 6f * density
+    val topH = 2.5f * density
+    val topLeft = cx - topW / 2f
+    val topTop = bodyTop - topH + 0.5f * density
+    canvas.drawRoundRect(
+        android.graphics.RectF(topLeft, topTop, topLeft + topW, topTop + topH + 1f * density),
+        1f * density, 1f * density, white
+    )
+
+    // Lente (círculo da cor do status sobre o corpo branco)
+    val lensPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color }
+    val lensRadius = 3.2f * density
+    canvas.drawCircle(cx, bodyTop + bodyH / 2f, lensRadius, lensPaint)
+
+    // Brilho da lente
+    val highlight = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        this.color = android.graphics.Color.WHITE
+    }
+    canvas.drawCircle(cx + 1f * density, bodyTop + bodyH / 2f - 1f * density, 0.9f * density, highlight)
 
     return BitmapDrawable(context.resources, bitmap)
 }
